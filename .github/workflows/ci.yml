@@ -46,7 +46,7 @@ jobs:
 
       - name: Run tests
         env:
-          POSTGRES_DSN: postgresql://postgres:postgres@localhost:5432/job_board_db
+          POSTGRES_DSN: mongodb://atlas-sql-67db44a7f9567b51534943ea-lbmzb.a.query.mongodb.net/myVirtualDatabase?ssl=true&authSource=admin
           MONGO_URI: mongodb://localhost:27017
           MONGO_DB: job_board_mongo
           API_PREFIX: /api/v1
