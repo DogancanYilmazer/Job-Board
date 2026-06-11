@@ -1,0 +1,842 @@
+{% extends "base.html" %}
+
+{% block title %}My Profile - JobBoard{% endblock %}
+
+{% block content %}
+<!-- Loading State -->
+<div id="loading-state" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 text-center">
+    <div class="w-16 h-16 mx-auto border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin"></div>
+    <p class="mt-4 text-gray-500">Loading profile...</p>
+</div>
+
+<!-- Profile Content -->
+<div id="profile-content" class="hidden">
+    <!-- Cover Header -->
+    <div class="h-48 md:h-64 bg-gradient-to-r from-primary-600 to-cyan-500 relative">
+        <div class="absolute inset-0 opacity-20">
+            <div class="absolute top-10 left-20 w-40 h-40 bg-white rounded-full mix-blend-overlay filter blur-3xl"></div>
+            <div class="absolute bottom-10 right-20 w-60 h-60 bg-white rounded-full mix-blend-overlay filter blur-3xl"></div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="relative -mt-20 mb-8">
+            <div class="flex flex-col md:flex-row items-start md:items-end gap-6">
+                <div class="relative">
+                    <img id="profile-avatar" src="" alt="Profile" class="w-32 h-32 md:w-40 md:h-40 rounded-2xl border-4 border-white shadow-xl bg-white object-cover">
+                    <button onclick="document.getElementById('avatar-input').click()" class="absolute bottom-2 right-2 w-10 h-10 bg-white rounded-xl shadow-lg flex items-center justify-center text-gray-600 hover:text-primary-600 transition">
+                        <i class="fas fa-camera"></i>
+                    </button>
+                    <input type="file" id="avatar-input" accept="image/*" class="hidden" onchange="uploadAvatar(event)">
+                </div>
+                <div class="flex-1 pb-2">
+                    <h1 id="profile-name" class="text-2xl md:text-3xl font-bold text-gray-900">-</h1>
+                    <p id="profile-email" class="text-gray-500 mt-1">-</p>
+                    <div class="flex flex-wrap gap-2 mt-3" id="profile-roles">
+                    </div>
+                </div>
+                <button onclick="openEditModal()" class="px-6 py-3 bg-white border border-gray-200 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition shadow-sm">
+                    <i class="fas fa-edit mr-2"></i> Edit Profile
+                </button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 pb-12">
+            <!-- Left Column -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- About -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                    <h2 class="text-lg font-bold text-gray-900 mb-4">About Me</h2>
+                    <p id="profile-bio" class="text-gray-600 leading-relaxed">No biography has been added yet.</p>
+                </div>
+
+                <!-- Applicant Profile -->
+                <div id="applicant-section" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 hidden">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-lg font-bold text-gray-900">Applicant Profile</h2>
+                        <button id="applicant-edit-btn" onclick="openApplicantEditModal()" class="px-4 py-2 bg-primary-600 text-white text-sm font-medium rounded-lg hover:bg-primary-700 transition">
+                            <i class="fas fa-edit mr-1"></i> Edit
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        <div class="p-4 bg-gray-50 rounded-xl">
+                            <p class="text-sm text-gray-500 mb-1">Headline</p>
+                            <p id="applicant-headline" class="font-semibold text-gray-900">-</p>
+                        </div>
+                        <div class="p-4 bg-gray-50 rounded-xl">
+                            <p class="text-sm text-gray-500 mb-1">Expected Salary</p>
+                            <p id="applicant-salary" class="font-semibold text-gray-900">-</p>
+                        </div>
+                        <div class="p-4 bg-gray-50 rounded-xl">
+                            <p class="text-sm text-gray-500 mb-1">Availability</p>
+                            <p id="applicant-availability" class="font-semibold text-gray-900">-</p>
+                        </div>
+                        <div class="p-4 bg-gray-50 rounded-xl">
+                            <p class="text-sm text-gray-500 mb-1">Visibility</p>
+                            <p id="applicant-visibility" class="font-semibold text-gray-900">-</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="font-semibold text-gray-900">Skills</h3>
+                    </div>
+                    <div id="applicant-skills" class="flex flex-wrap gap-2">
+                        <p class="text-gray-500 text-sm">No skills have been added yet.</p>
+                    </div>
+                </div>
+
+                <!-- Employer Profile -->
+                <div id="employer-section" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 hidden">
+                    <h2 class="text-lg font-bold text-gray-900 mb-4">Employer Profile</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="p-4 bg-gray-50 rounded-xl">
+                            <p class="text-sm text-gray-500 mb-1">Display Name</p>
+                            <p id="employer-display-name" class="font-semibold text-gray-900">-</p>
+                        </div>
+                        <div class="p-4 bg-gray-50 rounded-xl">
+                            <p class="text-sm text-gray-500 mb-1">Company Name</p>
+                            <p id="employer-company" class="font-semibold text-gray-900">-</p>
+                        </div>
+                        <div class="p-4 bg-gray-50 rounded-xl md:col-span-2">
+                            <p class="text-sm text-gray-500 mb-1">Website</p>
+                            <a id="employer-website" href="#" target="_blank" class="font-semibold text-primary-600 hover:underline">-</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Activity -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                    <h2 class="text-lg font-bold text-gray-900 mb-4">Recent Applications</h2>
+                    <div id="recent-applications" class="space-y-3">
+                        <p class="text-gray-500 text-sm text-center py-8">No applications have been submitted yet.</p>
+                    </div>
+                    <a href="/applications" class="block text-center text-primary-600 font-medium mt-4 hover:text-primary-700">
+                        All My Applications <i class="fas fa-arrow-right ml-1"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Right Column -->
+            <div class="space-y-6">
+                <!-- Stats -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                    <h3 class="font-semibold text-gray-900 mb-4">Statistics</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                            <span class="text-gray-600 text-sm">Total Applications</span>
+                            <span id="stat-total-apps" class="font-bold text-primary-600">0</span>
+                        </div>
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                            <span class="text-gray-600 text-sm">Pending</span>
+                            <span id="stat-pending-apps" class="font-bold text-yellow-600">0</span>
+                        </div>
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                            <span class="text-gray-600 text-sm">Accepted</span>
+                            <span id="stat-accepted-apps" class="font-bold text-green-600">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Security -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-semibold text-gray-900">Security</h3>
+                        <span id="twofa-status" class="px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">Off</span>
+                    </div>
+
+                    <div id="twofa-disabled-panel">
+                        <button type="button" id="enable-2fa-btn" onclick="enableTwoFactor()" class="w-full px-4 py-3 bg-primary-600 text-white font-medium rounded-xl hover:bg-primary-700 transition">
+                            <i class="fas fa-shield-halved mr-2"></i> Enable Two-Factor Authentication
+                        </button>
+                    </div>
+
+                    <div id="twofa-setup-panel" class="hidden space-y-4">
+                        <div class="p-4 bg-gray-50 rounded-xl text-center">
+                            <img id="twofa-qr" src="" alt="Scan this QR code" class="w-48 h-48 mx-auto rounded-lg bg-white p-2 border border-gray-200">
+                            <p class="mt-3 text-xs text-gray-500 break-all">Secret: <span id="twofa-secret" class="font-mono text-gray-700"></span></p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Verification Code</label>
+                            <input type="text" id="twofa-setup-code" maxlength="6" inputmode="numeric" pattern="[0-9]{6}" placeholder="123456"
+                                class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all tracking-widest">
+                        </div>
+                        <button type="button" id="verify-2fa-btn" onclick="verifyTwoFactorSetup()" class="w-full btn-primary py-3 text-white font-semibold rounded-xl">
+                            Verify and Enable
+                        </button>
+                    </div>
+
+                    <div id="twofa-enabled-panel" class="hidden space-y-4">
+                        <p class="text-sm text-gray-500">Two-factor authentication is active for this account.</p>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Current Code</label>
+                            <input type="text" id="twofa-disable-code" maxlength="6" inputmode="numeric" pattern="[0-9]{6}" placeholder="123456"
+                                class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all tracking-widest">
+                        </div>
+                        <button type="button" id="disable-2fa-btn" onclick="disableTwoFactor()" class="w-full px-4 py-3 bg-red-600 text-white font-medium rounded-xl hover:bg-red-700 transition">
+                            <i class="fas fa-shield mr-2"></i> Disable Two-Factor Authentication
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                    <h3 class="font-semibold text-gray-900 mb-4">Quick Actions</h3>
+                    <div class="space-y-3">
+                        <a href="/jobs" class="flex items-center p-3 rounded-xl hover:bg-primary-50 transition group">
+                            <div class="w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center text-primary-600 mr-3 group-hover:scale-110 transition-transform">
+                                <i class="fas fa-search"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-900">Search Jobs</p>
+                                <p class="text-xs text-gray-500">Discover new opportunities</p>
+                            </div>
+                        </a>
+                        <a href="/applications" class="flex items-center p-3 rounded-xl hover:bg-primary-50 transition group">
+                            <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center text-green-600 mr-3 group-hover:scale-110 transition-transform">
+                                <i class="fas fa-paper-plane"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-900">My Applications</p>
+                                <p class="text-xs text-gray-500">View application statuses</p>
+                            </div>
+                        </a>
+                        <a href="/post-job" class="flex items-center p-3 rounded-xl hover:bg-primary-50 transition group">
+                            <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center text-purple-600 mr-3 group-hover:scale-110 transition-transform">
+                                <i class="fas fa-plus-circle"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-900">Post a Job</p>
+                                <p class="text-xs text-gray-500">Create a new job listing</p>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Modal -->
+<div id="edit-modal" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeEditModal()"></div>
+    <div class="absolute inset-0 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto animate-fade-in">
+            <div class="p-6 border-b border-gray-100 flex items-center justify-between">
+                <h3 class="text-xl font-bold text-gray-900">Edit Profile</h3>
+                <button onclick="closeEditModal()" class="w-8 h-8 rounded-lg hover:bg-gray-100 flex items-center justify-center transition">
+                    <i class="fas fa-times text-gray-500"></i>
+                </button>
+            </div>
+            <div class="p-6">
+                <form id="edit-form" onsubmit="saveProfile(event)">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+                        <input type="text" id="edit-name" required 
+                            class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Phone</label>
+                        <input type="tel" id="edit-phone" 
+                            class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all">
+                    </div>
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">About Me</label>
+                        <textarea id="edit-bio" rows="4" 
+                            class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all resize-none"></textarea>
+                    </div>
+                    <button type="submit" id="save-profile-btn" class="w-full btn-primary py-3 text-white font-semibold rounded-xl">
+                        Save
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Applicant Profile Edit Modal -->
+<div id="applicant-edit-modal" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeApplicantEditModal()"></div>
+    <div class="absolute inset-0 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto animate-fade-in">
+            <div class="p-6 border-b border-gray-100 flex items-center justify-between">
+                <h3 class="text-xl font-bold text-gray-900">Edit Applicant Profile</h3>
+                <button onclick="closeApplicantEditModal()" class="w-8 h-8 rounded-lg hover:bg-gray-100 flex items-center justify-center transition">
+                    <i class="fas fa-times text-gray-500"></i>
+                </button>
+            </div>
+            <div class="p-6">
+                <form id="applicant-edit-form" onsubmit="saveApplicantProfile(event)">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Headline</label>
+                        <input type="text" id="edit-headline" 
+                            class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all"
+                            placeholder="e.g. Senior Python Developer">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Bio</label>
+                        <textarea id="edit-applicant-bio" rows="3" 
+                            class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all resize-none"></textarea>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">City</label>
+                            <input type="text" id="edit-city" 
+                                class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Country</label>
+                            <input type="text" id="edit-country" 
+                                class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Min Salary</label>
+                            <input type="number" id="edit-salary-min" 
+                                class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Max Salary</label>
+                            <input type="number" id="edit-salary-max" 
+                                class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Currency</label>
+                            <select id="edit-currency" 
+                                class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all">
+                                <option value="EGP">EGP</option>
+                                <option value="USD">USD</option>
+                                <option value="EUR">EUR</option>
+                                <option value="TRY">TRY</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Availability</label>
+                            <select id="edit-availability" 
+                                class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all">
+                                <option value="OPEN_TO_WORK">Open to Work</option>
+                                <option value="EMPLOYED_OPEN">Employed but Open</option>
+                                <option value="NOT_LOOKING">Not Looking</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Visibility</label>
+                        <select id="edit-visibility" 
+                            class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all">
+                            <option value="PUBLIC">Public</option>
+                            <option value="REGISTERED">Registered Users Only</option>
+                            <option value="PRIVATE">Private</option>
+                        </select>
+                    </div>
+
+                    <!-- Skills Section -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Skills</label>
+                        <div class="flex gap-2 mb-3">
+                            <input type="text" id="skill-search" 
+                                class="flex-1 px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all"
+                                placeholder="Search skills..." oninput="searchSkills(this.value)">
+                        </div>
+                        <div id="skill-search-results" class="flex flex-wrap gap-2 mb-3"></div>
+                        <div id="selected-skills" class="flex flex-wrap gap-2">
+                            <p class="text-gray-400 text-sm">No skills selected.</p>
+                        </div>
+                    </div>
+
+                    <button type="submit" id="save-applicant-btn" class="w-full btn-primary py-3 text-white font-semibold rounded-xl">
+                        Save Applicant Profile
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let currentUser = null;
+
+    async function loadProfile() {
+        const { user } = getAuthFromStorage();
+        if (!user) {
+            window.location.href = '/login';
+            return;
+        }
+
+        try {
+            const [userData, appsData] = await Promise.all([
+                api(`/users/${user.id}`),
+                api(`/users/${user.id}/applications`).catch(() => ({ data: [] }))
+            ]);
+            
+            currentUser = userData.data;
+            renderProfile(currentUser, appsData.data || []);
+            
+            // Load applicant profile if exists
+            if (currentUser.roles?.includes('APPLICANT')) {
+                loadApplicantProfile(user.id);
+            }
+            
+            // Load employer profile if exists
+            if (currentUser.roles?.includes('EMPLOYER')) {
+                loadEmployerProfile(user.id);
+            }
+        } catch (err) {
+            showToast('Error', err.message, 'error');
+        }
+    }
+
+    function renderProfile(user, applications) {
+        document.getElementById('loading-state').classList.add('hidden');
+        document.getElementById('profile-content').classList.remove('hidden');
+        
+        document.getElementById('profile-name').textContent = user.full_name || 'Unnamed User';
+        document.getElementById('profile-email').textContent = user.email;
+        document.getElementById('profile-bio').textContent = user.bio || 'No biography has been added yet.';
+        
+        const avatarUrl = user.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.full_name || 'User')}&background=2563eb&color=fff&size=200`;
+        document.getElementById('profile-avatar').src = avatarUrl;
+        
+        // Roles
+        const rolesContainer = document.getElementById('profile-roles');
+        const roleLabels = {
+            'APPLICANT': { text: 'Job Seeker', class: 'bg-primary-100 text-primary-700' },
+            'EMPLOYER': { text: 'Employer', class: 'bg-purple-100 text-purple-700' },
+            'ADMIN': { text: 'Admin', class: 'bg-red-100 text-red-700' }
+        };
+        rolesContainer.innerHTML = (user.roles || []).map(role => {
+            const label = roleLabels[role] || { text: role, class: 'bg-gray-100 text-gray-700' };
+            return `<span class="px-3 py-1 rounded-full text-sm font-medium ${label.class}">${label.text}</span>`;
+        }).join('');
+        
+        // Applications stats
+        const total = applications.length;
+        const pending = applications.filter(a => ['APPLIED', 'REVIEWED'].includes(a.status)).length;
+        const accepted = applications.filter(a => a.status === 'ACCEPTED').length;
+        
+        document.getElementById('stat-total-apps').textContent = total;
+        document.getElementById('stat-pending-apps').textContent = pending;
+        document.getElementById('stat-accepted-apps').textContent = accepted;
+        
+        // Recent applications
+        const recentContainer = document.getElementById('recent-applications');
+        if (applications.length > 0) {
+            recentContainer.innerHTML = applications.slice(0, 5).map(app => {
+                const statusColors = {
+                    'APPLIED': 'bg-blue-100 text-blue-700',
+                    'REVIEWED': 'bg-yellow-100 text-yellow-700',
+                    'INTERVIEW': 'bg-purple-100 text-purple-700',
+                    'OFFER': 'bg-orange-100 text-orange-700',
+                    'ACCEPTED': 'bg-green-100 text-green-700',
+                    'REJECTED': 'bg-red-100 text-red-700',
+                    'WITHDRAWN': 'bg-gray-100 text-gray-700'
+                };
+                return `
+                    <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                        <div class="min-w-0">
+                            <p class="font-medium text-gray-900 truncate">${app.job_title || 'Listing'}</p>
+                            <p class="text-xs text-gray-500">${timeAgo(app.submitted_at || app.created_at)}</p>
+                        </div>
+                        <span class="px-3 py-1 rounded-full text-xs font-medium ${statusColors[app.status] || 'bg-gray-100 text-gray-700'} flex-shrink-0 ml-3">
+                            ${app.status}
+                        </span>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        // Edit form
+        document.getElementById('edit-name').value = user.full_name || '';
+        document.getElementById('edit-phone').value = user.phone || '';
+        document.getElementById('edit-bio').value = user.bio || '';
+
+        renderTwoFactorState(user);
+    }
+
+    async function loadApplicantProfile(userId) {
+        try {
+            const data = await api(`/applicant-profile/${userId}`);
+            const profile = data.data;
+            currentApplicantProfile = profile;
+            document.getElementById('applicant-section').classList.remove('hidden');
+            
+            document.getElementById('applicant-headline').textContent = profile.headline || 'Not specified';
+            document.getElementById('applicant-salary').textContent = formatSalary(
+                profile.expected_salary_min_minor, profile.expected_salary_max_minor, profile.currency, 'Monthly'
+            );
+            document.getElementById('applicant-availability').textContent = profile.availability || 'Not specified';
+            document.getElementById('applicant-visibility').textContent = profile.visibility || 'Not specified';
+            
+            const skillsContainer = document.getElementById('applicant-skills');
+            if (profile.skills && profile.skills.length > 0) {
+                skillsContainer.innerHTML = profile.skills.map(skill => `
+                    <span class="px-3 py-1.5 bg-primary-50 text-primary-700 rounded-lg text-sm font-medium">
+                        ${skill.canonical_name}
+                        ${skill.proficiency_level ? `<span class="text-primary-400">(${skill.proficiency_level})</span>` : ''}
+                    </span>
+                `).join('');
+            } else {
+                skillsContainer.innerHTML = '<p class="text-gray-500 text-sm">No skills have been added yet.</p>';
+            }
+        } catch (e) {
+            // Profile not found, show create button
+            currentApplicantProfile = null;
+            document.getElementById('applicant-section').classList.remove('hidden');
+            document.getElementById('applicant-section').innerHTML = `
+                <div class="text-center py-8">
+                    <div class="w-16 h-16 mx-auto bg-primary-100 rounded-full flex items-center justify-center mb-4">
+                        <i class="fas fa-user-tie text-primary-600 text-2xl"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">No Applicant Profile</h3>
+                    <p class="text-gray-500 mb-4">Create your applicant profile to add skills and improve your match scores.</p>
+                    <button onclick="openApplicantEditModal()" class="px-6 py-3 bg-primary-600 text-white font-medium rounded-xl hover:bg-primary-700 transition">
+                        <i class="fas fa-plus mr-2"></i> Create Applicant Profile
+                    </button>
+                </div>
+            `;
+        }
+    }
+
+    async function loadEmployerProfile(userId) {
+        try {
+            const data = await api(`/employer-profile/${userId}`);
+            const profile = data.data;
+            document.getElementById('employer-section').classList.remove('hidden');
+            
+            document.getElementById('employer-display-name').textContent = profile.display_name || 'Not specified';
+            document.getElementById('employer-company').textContent = profile.company_name || 'Not specified';
+            const websiteEl = document.getElementById('employer-website');
+            if (profile.website_url) {
+                websiteEl.textContent = profile.website_url;
+                websiteEl.href = profile.website_url;
+            } else {
+                websiteEl.textContent = 'Not specified';
+                websiteEl.href = '#';
+            }
+        } catch (e) {
+            // Profile not found, that's okay
+        }
+    }
+
+    function openEditModal() {
+        document.getElementById('edit-modal').classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeEditModal() {
+        document.getElementById('edit-modal').classList.add('hidden');
+        document.body.style.overflow = '';
+    }
+
+    async function saveProfile(e) {
+        e.preventDefault();
+        const btn = document.getElementById('save-profile-btn');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Saving...';
+
+        try {
+            await api(`/users/${currentUser.id}`, {
+                method: 'PATCH',
+                body: JSON.stringify({
+                    full_name: document.getElementById('edit-name').value,
+                    phone: document.getElementById('edit-phone').value
+                })
+            });
+            
+            // Update local storage
+            currentUser.full_name = document.getElementById('edit-name').value;
+            currentUser.phone = document.getElementById('edit-phone').value;
+            saveUserToStorage(currentUser);
+            
+            showToast('Success', 'Your profile has been updated.');
+            closeEditModal();
+            renderProfile(currentUser, []);
+        } catch (err) {
+            showToast('Error', err.message, 'error');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = 'Save';
+        }
+    }
+
+    function uploadAvatar(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const formData = new FormData();
+        formData.append('file', file);
+
+        (async () => {
+            try {
+                const resp = await fetch(`${API_URL}/users/${currentUser.id}/avatar`, {
+                    method: 'POST',
+                    body: formData,
+                });
+                const data = await resp.json();
+                if (!resp.ok) throw new Error(data.errors?.[0]?.message || 'Upload failed');
+
+                currentUser = data.data;
+                saveUserToStorage(currentUser);
+                document.getElementById('profile-avatar').src = currentUser.avatar_url || document.getElementById('profile-avatar').src;
+                showToast('Success', 'Profile photo has been saved.');
+            } catch (err) {
+                showToast('Error', err.message, 'error');
+            }
+        })();
+    }
+
+    function renderTwoFactorState(user) {
+        const enabled = user.otp_enabled && user.otp_verified;
+        const status = document.getElementById('twofa-status');
+        const disabledPanel = document.getElementById('twofa-disabled-panel');
+        const setupPanel = document.getElementById('twofa-setup-panel');
+        const enabledPanel = document.getElementById('twofa-enabled-panel');
+
+        setupPanel.classList.add('hidden');
+        disabledPanel.classList.toggle('hidden', enabled);
+        enabledPanel.classList.toggle('hidden', !enabled);
+
+        if (enabled) {
+            status.textContent = 'On';
+            status.className = 'px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700';
+        } else {
+            status.textContent = 'Off';
+            status.className = 'px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600';
+        }
+    }
+
+    function requireTokenForTwoFactor() {
+        if (!getAuthFromStorage().token) {
+            showToast('Login Required', 'Please log in again before changing 2FA settings.', 'error');
+            return false;
+        }
+        return true;
+    }
+
+    async function enableTwoFactor() {
+        if (!requireTokenForTwoFactor()) return;
+        const btn = document.getElementById('enable-2fa-btn');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Preparing...';
+
+        try {
+            const data = await api('/auth/2fa/enable', { method: 'POST' });
+            document.getElementById('twofa-qr').src = `data:image/png;base64,${data.data.qr_code}`;
+            document.getElementById('twofa-secret').textContent = data.data.secret;
+            document.getElementById('twofa-disabled-panel').classList.add('hidden');
+            document.getElementById('twofa-enabled-panel').classList.add('hidden');
+            document.getElementById('twofa-setup-panel').classList.remove('hidden');
+            document.getElementById('twofa-setup-code').focus();
+        } catch (err) {
+            showToast('2FA Setup Failed', err.message, 'error');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-shield-halved mr-2"></i> Enable Two-Factor Authentication';
+        }
+    }
+
+    async function verifyTwoFactorSetup() {
+        if (!requireTokenForTwoFactor()) return;
+        const btn = document.getElementById('verify-2fa-btn');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Verifying...';
+
+        try {
+            const code = document.getElementById('twofa-setup-code').value;
+            const data = await api('/auth/2fa/verify-setup', {
+                method: 'POST',
+                body: JSON.stringify({ code })
+            });
+            currentUser = data.data.user;
+            saveUserToStorage(currentUser);
+            document.getElementById('twofa-setup-code').value = '';
+            renderTwoFactorState(currentUser);
+            showToast('2FA Enabled', data.data.message);
+        } catch (err) {
+            showToast('Verification Failed', err.message, 'error');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = 'Verify and Enable';
+        }
+    }
+
+    async function disableTwoFactor() {
+        if (!requireTokenForTwoFactor()) return;
+        const btn = document.getElementById('disable-2fa-btn');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Disabling...';
+
+        try {
+            const code = document.getElementById('twofa-disable-code').value;
+            const data = await api('/auth/2fa/disable', {
+                method: 'POST',
+                body: JSON.stringify({ code })
+            });
+            currentUser = data.data.user;
+            saveUserToStorage(currentUser);
+            document.getElementById('twofa-disable-code').value = '';
+            renderTwoFactorState(currentUser);
+            showToast('2FA Disabled', data.data.message);
+        } catch (err) {
+            showToast('Disable Failed', err.message, 'error');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-shield mr-2"></i> Disable Two-Factor Authentication';
+        }
+    }
+
+    // Applicant Profile Edit Functions
+    let currentApplicantProfile = null;
+    let selectedSkills = [];
+    let allSkills = [];
+
+    async function openApplicantEditModal() {
+        if (!currentApplicantProfile) {
+            currentApplicantProfile = {};
+        }
+        document.getElementById('edit-headline').value = currentApplicantProfile.headline || '';
+        document.getElementById('edit-applicant-bio').value = currentApplicantProfile.bio || '';
+        document.getElementById('edit-city').value = currentApplicantProfile.city || '';
+        document.getElementById('edit-country').value = currentApplicantProfile.country || '';
+        document.getElementById('edit-salary-min').value = currentApplicantProfile.expected_salary_min_minor || '';
+        document.getElementById('edit-salary-max').value = currentApplicantProfile.expected_salary_max_minor || '';
+        document.getElementById('edit-currency').value = currentApplicantProfile.currency || 'EGP';
+        document.getElementById('edit-availability').value = currentApplicantProfile.availability || 'OPEN_TO_WORK';
+        document.getElementById('edit-visibility').value = currentApplicantProfile.visibility || 'PUBLIC';
+
+        selectedSkills = currentApplicantProfile.skills ? [...currentApplicantProfile.skills] : [];
+        renderSelectedSkills();
+
+        document.getElementById('applicant-edit-modal').classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+
+        // Load all skills for search
+        try {
+            const resp = await api('/skills?q=');
+            allSkills = resp.data || [];
+        } catch (e) {
+            allSkills = [];
+        }
+    }
+
+    function closeApplicantEditModal() {
+        document.getElementById('applicant-edit-modal').classList.add('hidden');
+        document.body.style.overflow = '';
+        document.getElementById('skill-search-results').innerHTML = '';
+        document.getElementById('skill-search').value = '';
+    }
+
+    function searchSkills(query) {
+        const resultsContainer = document.getElementById('skill-search-results');
+        if (!query.trim()) {
+            resultsContainer.innerHTML = '';
+            return;
+        }
+        const selectedIds = new Set(selectedSkills.map(s => s.skill_id || s.id));
+        const matches = allSkills.filter(s => 
+            !selectedIds.has(s.id) && 
+            s.canonical_name.toLowerCase().includes(query.toLowerCase())
+        ).slice(0, 10);
+
+        if (matches.length === 0) {
+            resultsContainer.innerHTML = '<span class="text-gray-400 text-sm">No matching skills found.</span>';
+            return;
+        }
+
+        resultsContainer.innerHTML = matches.map(skill => `
+            <button type="button" onclick="addSkill('${skill.id}', '${skill.canonical_name.replace(/'/g, "\\'")}')"
+                class="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-primary-100 hover:text-primary-700 transition">
+                + ${skill.canonical_name}
+            </button>
+        `).join('');
+    }
+
+    function addSkill(skillId, skillName) {
+        if (selectedSkills.some(s => (s.skill_id || s.id) === skillId)) return;
+        selectedSkills.push({ skill_id: skillId, canonical_name: skillName, proficiency_level: 1, years_experience: 0 });
+        renderSelectedSkills();
+        document.getElementById('skill-search').value = '';
+        document.getElementById('skill-search-results').innerHTML = '';
+    }
+
+    function removeSkill(skillId) {
+        selectedSkills = selectedSkills.filter(s => (s.skill_id || s.id) !== skillId);
+        renderSelectedSkills();
+    }
+
+    function updateSkillLevel(skillId, level) {
+        const skill = selectedSkills.find(s => (s.skill_id || s.id) === skillId);
+        if (skill) skill.proficiency_level = parseInt(level);
+    }
+
+    function renderSelectedSkills() {
+        const container = document.getElementById('selected-skills');
+        if (selectedSkills.length === 0) {
+            container.innerHTML = '<p class="text-gray-400 text-sm">No skills selected.</p>';
+            return;
+        }
+        container.innerHTML = selectedSkills.map(skill => `
+            <div class="flex items-center gap-2 px-3 py-2 bg-primary-50 border border-primary-200 rounded-lg">
+                <span class="text-sm font-medium text-primary-700">${skill.canonical_name}</span>
+                <select onchange="updateSkillLevel('${skill.skill_id || skill.id}', this.value)"
+                    class="text-xs bg-white border border-primary-200 rounded px-1 py-0.5 text-primary-700 focus:outline-none">
+                    <option value="1" ${skill.proficiency_level == 1 ? 'selected' : ''}>1</option>
+                    <option value="2" ${skill.proficiency_level == 2 ? 'selected' : ''}>2</option>
+                    <option value="3" ${skill.proficiency_level == 3 ? 'selected' : ''}>3</option>
+                    <option value="4" ${skill.proficiency_level == 4 ? 'selected' : ''}>4</option>
+                    <option value="5" ${skill.proficiency_level == 5 ? 'selected' : ''}>5</option>
+                </select>
+                <button type="button" onclick="removeSkill('${skill.skill_id || skill.id}')"
+                    class="text-primary-400 hover:text-red-500 transition ml-1">
+                    <i class="fas fa-times text-xs"></i>
+                </button>
+            </div>
+        `).join('');
+    }
+
+    async function saveApplicantProfile(e) {
+        e.preventDefault();
+        const btn = document.getElementById('save-applicant-btn');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Saving...';
+
+        const { user } = getAuthFromStorage();
+        const payload = {
+            headline: document.getElementById('edit-headline').value || null,
+            bio: document.getElementById('edit-applicant-bio').value || null,
+            city: document.getElementById('edit-city').value || null,
+            country: document.getElementById('edit-country').value || null,
+            expected_salary_min_minor: document.getElementById('edit-salary-min').value ? parseInt(document.getElementById('edit-salary-min').value) : null,
+            expected_salary_max_minor: document.getElementById('edit-salary-max').value ? parseInt(document.getElementById('edit-salary-max').value) : null,
+            currency: document.getElementById('edit-currency').value,
+            availability: document.getElementById('edit-availability').value,
+            visibility: document.getElementById('edit-visibility').value,
+            skills: selectedSkills.map(s => ({
+                skill_id: s.skill_id || s.id,
+                proficiency_level: s.proficiency_level || 1,
+                years_experience: s.years_experience || 0
+            }))
+        };
+
+        try {
+            const resp = await api(`/applicant-profile/${user.id}`, {
+                method: 'PUT',
+                body: JSON.stringify(payload)
+            });
+            currentApplicantProfile = resp.data;
+            loadApplicantProfile(user.id);
+            showToast('Success', 'Applicant profile updated successfully.');
+            closeApplicantEditModal();
+        } catch (err) {
+            showToast('Error', err.message, 'error');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = 'Save Applicant Profile';
+        }
+    }
+
+    loadProfile();
+</script>
+{% endblock %}

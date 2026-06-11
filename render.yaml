@@ -1,0 +1,41 @@
+services:
+  - type: web
+    name: job-board-api
+    runtime: docker
+    plan: free
+    branch: main
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: POSTGRES_DSN
+        fromDatabase:
+          name: job-board-postgres
+          property: connectionString
+      - key: MONGO_URI
+        fromService:
+          type: pserv
+          name: job-board-mongo
+          property: host
+      - key: MONGO_DB
+        value: job_board_mongo
+      - key: API_PREFIX
+        value: /api/v1
+      - key: PYTHONUNBUFFERED
+        value: "1"
+    healthCheckPath: /
+
+  - type: pserv
+    name: job-board-mongo
+    runtime: docker
+    plan: free
+    branch: main
+    dockerContext: .
+    dockerfilePath: ./Dockerfile.mongo
+    envVars:
+      - key: MONGO_INITDB_DATABASE
+        value: job_board_mongo
+
+databases:
+  - name: job-board-postgres
+    plan: free
+    databaseName: job_board_db
+    user: postgres

@@ -1,0 +1,384 @@
+{% extends "base.html" %}
+
+{% block title %}Job Listings - JobBoard{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="bg-white border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <h1 class="text-3xl font-bold text-gray-900" data-i18n="jobs.title">Job Listings</h1>
+        <p class="text-gray-500 mt-2" data-i18n="jobs.subtitle">Discover job opportunities that fit you</p>
+    </div>
+</div>
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="flex flex-col lg:flex-row gap-8">
+        <!-- Filters Sidebar -->
+        <aside class="w-full lg:w-72 flex-shrink-0">
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sticky top-24">
+                <div class="flex items-center justify-between mb-6">
+                        <h3 class="font-semibold text-gray-900" data-i18n="filters.title">Filters</h3>
+                        <button onclick="clearFilters()" class="text-sm text-primary-600 hover:text-primary-700" data-i18n="filters.clear">Clear</button>
+                </div>
+                
+                <!-- Search -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2" data-i18n="filters.keyword_label">Keyword</label>
+                    <div class="relative">
+                        <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                        <input type="text" id="filter-q" data-i18n-placeholder="filters.keyword_placeholder" placeholder="Job title, skill..." 
+                            class="w-full pl-10 pr-3 py-2.5 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all text-sm">
+                    </div>
+                </div>
+
+                <!-- Location -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2" data-i18n="filters.location_label">Location</label>
+                    <div class="relative mb-2">
+                        <i class="fas fa-globe absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                        <input type="text" id="filter-country" data-i18n-placeholder="filters.country_placeholder" placeholder="Country" 
+                            class="w-full pl-10 pr-3 py-2.5 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all text-sm">
+                    </div>
+                    <div class="relative">
+                        <i class="fas fa-city absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                        <input type="text" id="filter-city" data-i18n-placeholder="filters.city_placeholder" placeholder="City" 
+                            class="w-full pl-10 pr-3 py-2.5 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all text-sm">
+                    </div>
+                </div>
+
+                <!-- Job Type -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2" data-i18n="filters.job_type_label">Job Type</label>
+                    <div class="space-y-2">
+                        <label class="flex items-center cursor-pointer">
+                            <input type="checkbox" name="job_type" value="FULL_TIME" class="w-4 h-4 text-primary-600 rounded border-gray-300 focus:ring-primary-500">
+                            <span class="ml-2 text-sm text-gray-600" data-i18n="filters.full_time">Full Time</span>
+                        </label>
+                        <label class="flex items-center cursor-pointer">
+                            <input type="checkbox" name="job_type" value="PART_TIME" class="w-4 h-4 text-primary-600 rounded border-gray-300 focus:ring-primary-500">
+                            <span class="ml-2 text-sm text-gray-600" data-i18n="filters.part_time">Part Time</span>
+                        </label>
+                        <label class="flex items-center cursor-pointer">
+                            <input type="checkbox" name="job_type" value="CONTRACT" class="w-4 h-4 text-primary-600 rounded border-gray-300 focus:ring-primary-500">
+                            <span class="ml-2 text-sm text-gray-600" data-i18n="filters.contract">Contract</span>
+                        </label>
+                        <label class="flex items-center cursor-pointer">
+                            <input type="checkbox" name="job_type" value="FREELANCE" class="w-4 h-4 text-primary-600 rounded border-gray-300 focus:ring-primary-500">
+                            <span class="ml-2 text-sm text-gray-600" data-i18n="filters.freelance">Freelance</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Workplace -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2" data-i18n="filters.workplace_label">Workplace</label>
+                    <div class="space-y-2">
+                        <label class="flex items-center cursor-pointer">
+                            <input type="checkbox" name="workplace" value="ONSITE" class="w-4 h-4 text-primary-600 rounded border-gray-300 focus:ring-primary-500">
+                            <span class="ml-2 text-sm text-gray-600" data-i18n="filters.onsite">On-site</span>
+                        </label>
+                        <label class="flex items-center cursor-pointer">
+                            <input type="checkbox" name="workplace" value="REMOTE" class="w-4 h-4 text-primary-600 rounded border-gray-300 focus:ring-primary-500">
+                            <span class="ml-2 text-sm text-gray-600" data-i18n="filters.remote">Remote</span>
+                        </label>
+                        <label class="flex items-center cursor-pointer">
+                            <input type="checkbox" name="workplace" value="HYBRID" class="w-4 h-4 text-primary-600 rounded border-gray-300 focus:ring-primary-500">
+                            <span class="ml-2 text-sm text-gray-600" data-i18n="filters.hybrid">Hybrid</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Salary -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2" data-i18n="filters.salary_label">Salary Range</label>
+                    <div class="flex gap-2">
+                        <input type="number" id="filter-salary-min" data-i18n-placeholder="filters.salary_min_placeholder" placeholder="Min" 
+                            class="w-full px-3 py-2.5 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all text-sm">
+                        <input type="number" id="filter-salary-max" data-i18n-placeholder="filters.salary_max_placeholder" placeholder="Max" 
+                            class="w-full px-3 py-2.5 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all text-sm">
+                    </div>
+                </div>
+
+                <button onclick="applyFilters()" class="w-full btn-primary py-3 text-white font-medium rounded-xl" data-i18n="filters.apply">Apply Filters</button>
+            </div>
+        </aside>
+
+        <!-- Job List -->
+        <div class="flex-1">
+            <!-- Sort & Results Count -->
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                <p class="text-gray-500"><span id="results-count" class="font-semibold text-gray-900">0</span> <span data-i18n="jobs.found">listings found</span></p>
+                <div class="flex items-center gap-3">
+                    <select id="sort-select" onchange="applyFilters()" class="px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:border-primary-500 focus:ring-2 focus:ring-primary-200">
+                        <option value="created_at_desc" data-i18n="sort.newest">Newest</option>
+                        <option value="salary_desc" data-i18n="sort.salary_desc">Salary (High - Low)</option>
+                        <option value="salary_asc" data-i18n="sort.salary_asc">Salary (Low - High)</option>
+                    </select>
+                    <div class="flex bg-gray-100 rounded-xl p-1">
+                        <button id="view-grid" onclick="setView('grid')" class="p-2 rounded-lg bg-white shadow-sm text-primary-600">
+                            <i class="fas fa-th-large"></i>
+                        </button>
+                        <button id="view-list" onclick="setView('list')" class="p-2 rounded-lg text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-list"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Jobs Container -->
+            <div id="jobs-container" class="grid grid-cols-1 gap-4">
+                <!-- Loading skeletons -->
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                    <div class="flex items-start gap-4">
+                        <div class="skeleton w-14 h-14 rounded-xl flex-shrink-0"></div>
+                        <div class="flex-1">
+                            <div class="skeleton h-5 w-1/3 rounded mb-2"></div>
+                            <div class="skeleton h-4 w-1/4 rounded mb-3"></div>
+                            <div class="skeleton h-4 w-full rounded"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                    <div class="flex items-start gap-4">
+                        <div class="skeleton w-14 h-14 rounded-xl flex-shrink-0"></div>
+                        <div class="flex-1">
+                            <div class="skeleton h-5 w-1/3 rounded mb-2"></div>
+                            <div class="skeleton h-4 w-1/4 rounded mb-3"></div>
+                            <div class="skeleton h-4 w-full rounded"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                    <div class="flex items-start gap-4">
+                        <div class="skeleton w-14 h-14 rounded-xl flex-shrink-0"></div>
+                        <div class="flex-1">
+                            <div class="skeleton h-5 w-1/3 rounded mb-2"></div>
+                            <div class="skeleton h-4 w-1/4 rounded mb-3"></div>
+                            <div class="skeleton h-4 w-full rounded"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            <div id="pagination" class="flex justify-center mt-8 gap-2"></div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let currentPage = 1;
+    let currentView = 'grid';
+    const limit = 10;
+
+    function getUrlParams() {
+        const params = new URLSearchParams(window.location.search);
+        document.getElementById('filter-q').value = params.get('q') || '';
+        document.getElementById('filter-city').value = params.get('city') || '';
+        document.getElementById('filter-country').value = params.get('country') || '';
+        document.getElementById('sort-select').value = params.get('sort') || 'created_at_desc';
+        currentPage = parseInt(params.get('page')) || 1;
+        
+        const jobType = params.get('job_type');
+        if (jobType) {
+            jobType.split(',').forEach(v => {
+                document.querySelector(`input[name="job_type"][value="${v}"]`)?.setAttribute('checked', 'checked');
+            });
+        }
+        
+        const workplace = params.get('workplace_type');
+        if (workplace) {
+            workplace.split(',').forEach(v => {
+                document.querySelector(`input[name="workplace"][value="${v}"]`)?.setAttribute('checked', 'checked');
+            });
+        }
+    }
+
+    function buildQuery() {
+        const params = new URLSearchParams();
+        const q = document.getElementById('filter-q').value;
+        const city = document.getElementById('filter-city').value;
+        const country = document.getElementById('filter-country').value;
+        const sort = document.getElementById('sort-select').value;
+        const salaryMin = document.getElementById('filter-salary-min').value;
+        const salaryMax = document.getElementById('filter-salary-max').value;
+        
+        if (q) params.set('q', q);
+        if (city) params.set('city', city);
+        if (country) params.set('country', country);
+        if (sort) params.set('sort', sort);
+        if (salaryMin) params.set('salary_min_minor', salaryMin);
+        if (salaryMax) params.set('salary_max_minor', salaryMax);
+        
+        const jobTypes = Array.from(document.querySelectorAll('input[name="job_type"]:checked')).map(cb => cb.value);
+        if (jobTypes.length) params.set('job_type', jobTypes.join(','));
+        
+        const workplaces = Array.from(document.querySelectorAll('input[name="workplace"]:checked')).map(cb => cb.value);
+        if (workplaces.length) params.set('workplace_type', workplaces.join(','));
+        
+        params.set('page', currentPage);
+        params.set('limit', limit);
+        
+        return params.toString();
+    }
+
+    function applyFilters() {
+        currentPage = 1;
+        const query = buildQuery();
+        window.history.replaceState({}, '', `?${query}`);
+        loadJobs();
+    }
+
+    function clearFilters() {
+        document.getElementById('filter-q').value = '';
+        document.getElementById('filter-city').value = '';
+        document.getElementById('filter-country').value = '';
+        document.getElementById('filter-salary-min').value = '';
+        document.getElementById('filter-salary-max').value = '';
+        document.getElementById('sort-select').value = 'created_at_desc';
+        document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+        currentPage = 1;
+        window.history.replaceState({}, '', '?');
+        loadJobs();
+    }
+
+    function setView(view) {
+        currentView = view;
+        document.getElementById('view-grid').className = view === 'grid' ? 'p-2 rounded-lg bg-white shadow-sm text-primary-600' : 'p-2 rounded-lg text-gray-500 hover:text-gray-700';
+        document.getElementById('view-list').className = view === 'list' ? 'p-2 rounded-lg bg-white shadow-sm text-primary-600' : 'p-2 rounded-lg text-gray-500 hover:text-gray-700';
+        loadJobs();
+    }
+
+    function renderJobCard(job) {
+        const isGrid = currentView === 'grid';
+        const location = [job.city, job.country].filter(Boolean).join(', ');
+        
+        return `
+            <a href="/jobs/${job.id}" class="block bg-white rounded-2xl p-6 shadow-sm border border-gray-100 card-hover animate-fade-in ${isGrid ? '' : 'flex items-start gap-5'}">
+                <div class="${isGrid ? 'flex items-start justify-between mb-4' : 'flex-shrink-0'}">
+                    <div class="w-14 h-14 bg-gradient-to-br from-primary-100 to-cyan-100 rounded-xl flex items-center justify-center text-primary-600 font-bold text-xl">
+                        ${(job.title || 'J').charAt(0)}
+                    </div>
+                    ${isGrid ? `<span class="px-3 py-1 rounded-full text-xs font-medium ${job.availability?.status === 'AVAILABLE' ? 'bg-green-100 text-green-700' : job.availability?.status === 'TAKEN' ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-600'}">${job.availability?.status === 'AVAILABLE' ? 'Open' : job.availability?.status === 'TAKEN' ? 'Taken' : 'Closed'}</span>` : ''}
+                </div>
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <h3 class="font-semibold text-gray-900 mb-1 ${isGrid ? 'line-clamp-1' : ''}">${job.title}</h3>
+                            <p class="text-sm text-gray-500">${location || 'Remote'}</p>
+                        </div>
+                        ${!isGrid ? `<span class="px-3 py-1 rounded-full text-xs font-medium ${job.availability?.status === 'AVAILABLE' ? 'bg-green-100 text-green-700' : job.availability?.status === 'TAKEN' ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-600'}">${job.availability?.status === 'AVAILABLE' ? 'Open' : job.availability?.status === 'TAKEN' ? 'Taken' : 'Closed'}</span>` : ''}
+                    </div>
+                    <p class="text-gray-600 text-sm mt-2 line-clamp-2">${job.description || ''}</p>
+                    <div class="flex flex-wrap gap-2 mt-3">
+                        ${job.workplace_type ? `<span class="px-2.5 py-1 bg-gray-100 text-gray-600 text-xs rounded-lg font-medium">${job.workplace_type}</span>` : ''}
+                        ${job.job_type ? `<span class="px-2.5 py-1 bg-gray-100 text-gray-600 text-xs rounded-lg font-medium">${job.job_type}</span>` : ''}
+                        ${job.career_level ? `<span class="px-2.5 py-1 bg-primary-50 text-primary-600 text-xs rounded-lg font-medium">${job.career_level}</span>` : ''}
+                        ${job.remote_allowed ? '<span class="px-2.5 py-1 bg-green-50 text-green-600 text-xs rounded-lg font-medium">Remote</span>' : ''}
+                    </div>
+                    <div class="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
+                        <div class="flex items-center gap-3">
+                            <span class="text-primary-600 font-bold">${formatSalary(job.salary?.min_minor, job.salary?.max_minor, job.salary?.currency, job.salary?.period)}</span>
+                            ${(job.match_score !== null && job.match_score !== undefined) ? `
+                                <span class="flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold ${job.match_score >= 80 ? 'bg-green-100 text-green-700' : job.match_score >= 50 ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'}">
+                                    <i class="fas fa-bullseye"></i> ${job.match_score}% Score
+                                </span>
+                            ` : ''}
+                        </div>
+                        <span class="text-xs text-gray-400">${timeAgo(job.created_at)}</span>
+                    </div>
+                </div>
+            </a>
+        `;
+    }
+
+    async function loadJobs() {
+        const container = document.getElementById('jobs-container');
+        const query = buildQuery();
+        
+        try {
+            const data = await api(`/jobs?${query}`);
+            const jobs = data.data || [];
+            const meta = data.meta || { total: 0, page: 1, limit };
+            
+            document.getElementById('results-count').textContent = meta.total;
+            
+            if (jobs.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-16 bg-white rounded-2xl border border-gray-100">
+                        <div class="w-20 h-20 mx-auto bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                            <i class="fas fa-search text-3xl text-gray-400"></i>
+                        </div>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2" data-i18n="jobs.no_results">No jobs found</h3>
+                            <p class="text-gray-500" data-i18n="jobs.try_different">Try different search criteria.</p>
+                    </div>
+                `;
+                document.getElementById('pagination').innerHTML = '';
+                return;
+            }
+
+            container.className = currentView === 'grid' 
+                ? 'grid grid-cols-1 md:grid-cols-2 gap-4'
+                : 'grid grid-cols-1 gap-4';
+            
+            container.innerHTML = jobs.map(renderJobCard).join('');
+            
+            // Pagination
+            const totalPages = Math.ceil(meta.total / limit);
+            renderPagination(totalPages, meta.page);
+        } catch (err) {
+            container.innerHTML = `
+                <div class="text-center py-16 bg-white rounded-2xl border border-gray-100">
+                    <div class="w-20 h-20 mx-auto bg-red-100 rounded-full flex items-center justify-center mb-4">
+                        <i class="fas fa-exclamation-triangle text-3xl text-red-500"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">An error occurred</h3>
+                    <p class="text-gray-500">${err.message}</p>
+                </div>
+            `;
+        }
+    }
+
+    function renderPagination(totalPages, page) {
+        const container = document.getElementById('pagination');
+        if (totalPages <= 1) {
+            container.innerHTML = '';
+            return;
+        }
+        
+        let html = '';
+        if (page > 1) {
+            html += `<button onclick="goToPage(${page - 1})" class="px-4 py-2 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 transition"><i class="fas fa-chevron-left"></i></button>`;
+        }
+        
+        for (let i = 1; i <= totalPages; i++) {
+            if (i === page) {
+                html += `<button class="px-4 py-2 rounded-xl bg-primary-600 text-white font-medium">${i}</button>`;
+            } else if (i === 1 || i === totalPages || (i >= page - 1 && i <= page + 1)) {
+                html += `<button onclick="goToPage(${i})" class="px-4 py-2 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 transition">${i}</button>`;
+            } else if (i === page - 2 || i === page + 2) {
+                html += `<span class="px-2 text-gray-400">...</span>`;
+            }
+        }
+        
+        if (page < totalPages) {
+            html += `<button onclick="goToPage(${page + 1})" class="px-4 py-2 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 transition"><i class="fas fa-chevron-right"></i></button>`;
+        }
+        
+        container.innerHTML = html;
+    }
+
+    function goToPage(page) {
+        currentPage = page;
+        const query = buildQuery();
+        window.history.replaceState({}, '', `?${query}`);
+        loadJobs();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    getUrlParams();
+    loadJobs();
+</script>
+{% endblock %}

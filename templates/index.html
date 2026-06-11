@@ -1,0 +1,259 @@
+{% extends "base.html" %}
+
+{% block title %}JobBoard - Find Your Dream Job{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-gradient relative overflow-hidden">
+    <div class="absolute inset-0 opacity-10">
+        <div class="absolute top-20 left-10 w-72 h-72 bg-white rounded-full mix-blend-overlay filter blur-3xl"></div>
+        <div class="absolute bottom-20 right-10 w-96 h-96 bg-white rounded-full mix-blend-overlay filter blur-3xl"></div>
+    </div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28 relative">
+        <div class="text-center max-w-3xl mx-auto">
+            <div class="inline-flex items-center px-4 py-2 rounded-full bg-white/10 backdrop-blur text-white text-sm mb-6">
+                <span class="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></span>
+                <span data-i18n="hero.live_count_text">Right now</span> <span id="hero-job-count" class="font-bold mx-1">0</span> <span data-i18n="hero.active_jobs">active job listings</span>
+            </div>
+            <h1 class="text-4xl md:text-6xl font-extrabold text-white mb-6 leading-tight" data-i18n="hero.title">Find Your Dream <span class="text-cyan-300">Job</span></h1>
+            <p class="text-lg md:text-xl text-blue-100 mb-10" data-i18n="hero.subtitle">
+                Discover the best match from thousands of companies and job opportunities.
+                Take the next step in your career with JobBoard.
+            </p>
+            <div class="bg-white rounded-2xl shadow-2xl p-2 max-w-2xl mx-auto">
+                <div class="flex flex-col md:flex-row gap-2">
+                    <div class="flex-1 relative">
+                        <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                        <input type="text" id="hero-search" data-i18n-placeholder="hero.search_placeholder" placeholder="Search by title, skill, or company..." 
+                            class="w-full pl-12 pr-4 py-4 rounded-xl border-0 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-primary-500 transition-all">
+                    </div>
+                    <div class="flex-1 relative">
+                        <i class="fas fa-map-marker-alt absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                        <input type="text" id="hero-location" data-i18n-placeholder="hero.location_placeholder" placeholder="City or country" 
+                            class="w-full pl-12 pr-4 py-4 rounded-xl border-0 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-primary-500 transition-all">
+                    </div>
+                    <button onclick="searchJobs()" class="btn-primary px-8 py-4 text-white font-semibold rounded-xl" data-i18n="hero.search_button">Search</button>
+                </div>
+            </div>
+            <div class="mt-8 flex flex-wrap justify-center gap-3 text-sm text-blue-100">
+                <span data-i18n="hero.popular">Popular:</span>
+                <a href="/jobs?q=Software" class="px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 transition">Software</a>
+                <a href="/jobs?q=Design" class="px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 transition">Design</a>
+                <a href="/jobs?q=Marketing" class="px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 transition">Marketing</a>
+                <a href="/jobs?q=Data+Analysis" class="px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 transition">Data Analysis</a>
+                <a href="/jobs?q=Project+Management" class="px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 transition">Project Management</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Section -->
+<section class="py-12 bg-white border-b border-gray-100">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+            <div class="animate-fade-in">
+                <div class="text-3xl md:text-4xl font-bold text-primary-600 mb-1" id="stat-jobs">0</div>
+                <div class="text-gray-500 text-sm">Active Job Listings</div>
+            </div>
+            <div class="animate-fade-in">
+                <div class="text-3xl md:text-4xl font-bold text-primary-600 mb-1" id="stat-companies">0</div>
+                <div class="text-gray-500 text-sm">Companies</div>
+            </div>
+            <div class="animate-fade-in">
+                <div class="text-3xl md:text-4xl font-bold text-primary-600 mb-1" id="stat-applicants">0</div>
+                <div class="text-gray-500 text-sm">Job Seekers</div>
+            </div>
+            <div class="animate-fade-in">
+                <div class="text-3xl md:text-4xl font-bold text-primary-600 mb-1" id="stat-matches">0</div>
+                <div class="text-gray-500 text-sm">Matches</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Jobs -->
+<section class="py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-end mb-8">
+            <div>
+                <h2 class="text-3xl font-bold text-gray-900" data-i18n="featured.title">Featured Jobs</h2>
+                <p class="text-gray-500 mt-2" data-i18n="featured.subtitle">Recently added and most popular job opportunities</p>
+            </div>
+            <a href="/jobs" class="hidden md:flex items-center text-primary-600 font-medium hover:text-primary-700" data-i18n="featured.view_all">View All <i class="fas fa-arrow-right ml-2"></i></a>
+        </div>
+        <div id="featured-jobs" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Loading skeletons -->
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                <div class="skeleton h-12 w-12 rounded-xl mb-4"></div>
+                <div class="skeleton h-6 w-3/4 rounded mb-2"></div>
+                <div class="skeleton h-4 w-1/2 rounded mb-4"></div>
+                <div class="skeleton h-4 w-full rounded mb-2"></div>
+                <div class="skeleton h-4 w-2/3 rounded"></div>
+            </div>
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                <div class="skeleton h-12 w-12 rounded-xl mb-4"></div>
+                <div class="skeleton h-6 w-3/4 rounded mb-2"></div>
+                <div class="skeleton h-4 w-1/2 rounded mb-4"></div>
+                <div class="skeleton h-4 w-full rounded mb-2"></div>
+                <div class="skeleton h-4 w-2/3 rounded"></div>
+            </div>
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                <div class="skeleton h-12 w-12 rounded-xl mb-4"></div>
+                <div class="skeleton h-6 w-3/4 rounded mb-2"></div>
+                <div class="skeleton h-4 w-1/2 rounded mb-4"></div>
+                <div class="skeleton h-4 w-full rounded mb-2"></div>
+                <div class="skeleton h-4 w-2/3 rounded"></div>
+            </div>
+        </div>
+        <div class="mt-8 text-center md:hidden">
+            <a href="/jobs" class="btn-primary inline-block px-6 py-3 text-white font-medium rounded-xl" data-i18n="featured.view_all_mobile">View All Jobs</a>
+        </div>
+    </div>
+</section>
+
+<!-- Categories -->
+<section class="py-16 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold text-gray-900" data-i18n="categories.title">Categories</h2>
+            <p class="text-gray-500 mt-2" data-i18n="categories.subtitle">Discover job listings based on your interests</p>
+        </div>
+        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            <a href="/jobs?q=Software" class="group p-6 rounded-2xl bg-gray-50 hover:bg-primary-50 border border-gray-100 hover:border-primary-200 transition-all text-center">
+                <div class="w-14 h-14 mx-auto bg-white rounded-2xl shadow-sm flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                    <i class="fas fa-code text-2xl text-primary-600"></i>
+                </div>
+                <span class="font-medium text-gray-700 group-hover:text-primary-700" data-i18n="categories.software">Software</span>
+            </a>
+            <a href="/jobs?q=Design" class="group p-6 rounded-2xl bg-gray-50 hover:bg-primary-50 border border-gray-100 hover:border-primary-200 transition-all text-center">
+                <div class="w-14 h-14 mx-auto bg-white rounded-2xl shadow-sm flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                    <i class="fas fa-palette text-2xl text-purple-600"></i>
+                </div>
+                <span class="font-medium text-gray-700 group-hover:text-primary-700" data-i18n="categories.design">Design</span>
+            </a>
+            <a href="/jobs?q=Marketing" class="group p-6 rounded-2xl bg-gray-50 hover:bg-primary-50 border border-gray-100 hover:border-primary-200 transition-all text-center">
+                <div class="w-14 h-14 mx-auto bg-white rounded-2xl shadow-sm flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                    <i class="fas fa-bullhorn text-2xl text-orange-600"></i>
+                </div>
+                <span class="font-medium text-gray-700 group-hover:text-primary-700" data-i18n="categories.marketing">Marketing</span>
+            </a>
+            <a href="/jobs?q=Data" class="group p-6 rounded-2xl bg-gray-50 hover:bg-primary-50 border border-gray-100 hover:border-primary-200 transition-all text-center">
+                <div class="w-14 h-14 mx-auto bg-white rounded-2xl shadow-sm flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                    <i class="fas fa-chart-line text-2xl text-green-600"></i>
+                </div>
+                <span class="font-medium text-gray-700 group-hover:text-primary-700" data-i18n="categories.data">Data</span>
+            </a>
+            <a href="/jobs?q=Human+Resources" class="group p-6 rounded-2xl bg-gray-50 hover:bg-primary-50 border border-gray-100 hover:border-primary-200 transition-all text-center">
+                <div class="w-14 h-14 mx-auto bg-white rounded-2xl shadow-sm flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                    <i class="fas fa-users text-2xl text-pink-600"></i>
+                </div>
+                <span class="font-medium text-gray-700 group-hover:text-primary-700" data-i18n="categories.hr">HR</span>
+            </a>
+            <a href="/jobs?q=Accounting" class="group p-6 rounded-2xl bg-gray-50 hover:bg-primary-50 border border-gray-100 hover:border-primary-200 transition-all text-center">
+                <div class="w-14 h-14 mx-auto bg-white rounded-2xl shadow-sm flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                    <i class="fas fa-calculator text-2xl text-yellow-600"></i>
+                </div>
+                <span class="font-medium text-gray-700 group-hover:text-primary-700" data-i18n="categories.accounting">Accounting</span>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="bg-gradient-to-r from-primary-600 to-cyan-600 rounded-3xl p-8 md:p-16 text-center text-white relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2"></div>
+            <div class="absolute bottom-0 left-0 w-48 h-48 bg-white/10 rounded-full translate-y-1/2 -translate-x-1/2"></div>
+            <div class="relative z-10">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4" data-i18n="cta.title">Find the best talent for your company</h2>
+                <p class="text-lg text-blue-100 mb-8 max-w-2xl mx-auto" data-i18n="cta.subtitle">Publish your job listing and choose the best fit from thousands of talented candidates.</p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <a href="/post-job" class="employer-only px-8 py-4 bg-white text-primary-600 font-semibold rounded-xl hover:bg-gray-100 transition shadow-lg" data-i18n="cta.post_job"><i class="fas fa-plus-circle mr-2"></i> Post a Job for Free</a>
+                    <a href="/employers" class="px-8 py-4 bg-white/10 text-white font-semibold rounded-xl hover:bg-white/20 transition backdrop-blur" data-i18n="cta.learn_more">Learn More</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function searchJobs() {
+        const q = document.getElementById('hero-search').value;
+        const loc = document.getElementById('hero-location').value;
+        let url = '/jobs?';
+        if (q) url += `q=${encodeURIComponent(q)}&`;
+        if (loc) url += `city=${encodeURIComponent(loc)}&`;
+        window.location.href = url;
+    }
+
+    document.getElementById('hero-search')?.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') searchJobs();
+    });
+
+    document.getElementById('hero-location')?.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') searchJobs();
+    });
+
+    async function loadFeaturedJobs() {
+        try {
+            const data = await api('/jobs?limit=6');
+            const jobs = data.data || [];
+            const container = document.getElementById('featured-jobs');
+            
+            document.getElementById('hero-job-count').textContent = data.meta?.total || jobs.length;
+            document.getElementById('stat-jobs').textContent = data.meta?.total || 0;
+            
+            if (jobs.length === 0) {
+                container.innerHTML = '<div class="col-span-3 text-center py-12 text-gray-500">No job listings available yet.</div>';
+                return;
+            }
+
+            container.innerHTML = jobs.map(job => `
+                <a href="/jobs/${job.id}" class="block bg-white rounded-2xl p-6 shadow-sm border border-gray-100 card-hover animate-fade-in">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="w-12 h-12 bg-gradient-to-br from-primary-100 to-cyan-100 rounded-xl flex items-center justify-center text-primary-600 font-bold text-lg">
+                            ${(job.title || 'J').charAt(0)}
+                        </div>
+                        <span class="px-3 py-1 rounded-full text-xs font-medium ${job.availability?.status === 'AVAILABLE' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}">
+                            ${job.availability?.status === 'AVAILABLE' ? 'Open' : 'Filled'}
+                        </span>
+                    </div>
+                    <h3 class="font-semibold text-gray-900 mb-1 line-clamp-1">${job.title}</h3>
+                    <p class="text-sm text-gray-500 mb-3">${job.city || ''}${job.city && job.country ? ', ' : ''}${job.country || ''}</p>
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        ${job.workplace_type ? `<span class="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-lg">${job.workplace_type}</span>` : ''}
+                        ${job.job_type ? `<span class="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-lg">${job.job_type}</span>` : ''}
+                        ${job.remote_allowed ? '<span class="px-2 py-1 bg-green-100 text-green-600 text-xs rounded-lg">Remote</span>' : ''}
+                    </div>
+                    <div class="flex items-center justify-between pt-4 border-t border-gray-100">
+                        <div class="flex items-center gap-2">
+                            <span class="text-primary-600 font-semibold text-sm">${formatSalary(job.salary?.min_minor, job.salary?.max_minor, job.salary?.currency, job.salary?.period)}</span>
+                            ${(job.match_score !== null && job.match_score !== undefined) ? `
+                                <span class="flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-bold ${job.match_score >= 80 ? 'bg-green-100 text-green-700' : job.match_score >= 50 ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'}">
+                                    <i class="fas fa-bullseye"></i> ${job.match_score}%
+                                </span>
+                            ` : ''}
+                        </div>
+                        <span class="text-xs text-gray-400">${timeAgo(job.created_at)}</span>
+                    </div>
+                </a>
+            `).join('');
+        } catch (err) {
+            console.error('Error loading jobs:', err);
+        }
+    }
+
+    // Load stats
+    async function loadStats() {
+        document.getElementById('stat-applicants').textContent = '1.2K';
+        document.getElementById('stat-companies').textContent = '340';
+        document.getElementById('stat-matches').textContent = '5.6K';
+    }
+
+    loadFeaturedJobs();
+    loadStats();
+</script>
+{% endblock %}

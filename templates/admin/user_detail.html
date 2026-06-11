@@ -1,0 +1,182 @@
+{% extends "admin/admin_base.html" %}
+{% block title %}User Detail{% endblock %}
+{% block page_title %}User Detail{% endblock %}
+{% block content %}
+<div class="max-w-4xl mx-auto animate-fade-in">
+    <div class="mb-4">
+        <a href="/admin/users" class="text-sm text-gray-500 hover:text-admin-600"><i class="fas fa-arrow-left mr-1"></i> Users</a>
+    </div>
+
+    <div id="user-detail" class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
+        <div class="flex items-start justify-between mb-6">
+            <div class="flex items-center space-x-4">
+                <img id="ud-avatar" src="" class="w-16 h-16 rounded-full" alt="">
+                <div>
+                    <h2 id="ud-name" class="text-xl font-bold text-gray-900">—</h2>
+                    <p id="ud-email" class="text-gray-500">—</p>
+                    <div id="ud-badges" class="mt-2 space-x-1"></div>
+                </div>
+            </div>
+            <div class="flex items-center space-x-2">
+                <button onclick="toggleBlockUser()" id="btn-block" class="px-3 py-1.5 text-sm font-medium rounded-lg border transition-colors">
+                    Loading...
+                </button>
+                <button onclick="confirmDeleteUser()" class="px-3 py-1.5 text-sm font-medium rounded-lg border border-red-300 text-red-600 hover:bg-red-50 transition-colors">
+                    <i class="fas fa-trash-alt mr-1"></i> Delete
+                </button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <h3 class="text-sm font-semibold text-gray-900 uppercase tracking-wide mb-3">Information</h3>
+                <div class="space-y-3 text-sm">
+                    <div class="flex justify-between border-b border-gray-100 pb-2">
+                        <span class="text-gray-500">Phone</span>
+                        <span id="ud-phone" class="text-gray-900 font-medium">—</span>
+                    </div>
+                    <div class="flex justify-between border-b border-gray-100 pb-2">
+                        <span class="text-gray-500">Language</span>
+                        <span id="ud-locale" class="text-gray-900 font-medium">—</span>
+                    </div>
+                    <div class="flex justify-between border-b border-gray-100 pb-2">
+                        <span class="text-gray-500">Registration Date</span>
+                        <span id="ud-created" class="text-gray-900 font-medium">—</span>
+                    </div>
+                    <div class="flex justify-between border-b border-gray-100 pb-2">
+                        <span class="text-gray-500">Updated</span>
+                        <span id="ud-updated" class="text-gray-900 font-medium">—</span>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <h3 class="text-sm font-semibold text-gray-900 uppercase tracking-wide mb-3">Role Management</h3>
+                <div class="space-y-2">
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <span class="text-sm font-medium text-gray-700">Admin</span>
+                        <button onclick="toggleRole('ADMIN')" id="role-ADMIN" class="text-sm px-3 py-1 rounded-full font-medium transition-colors">—</button>
+                    </div>
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <span class="text-sm font-medium text-gray-700">Employer</span>
+                        <button onclick="toggleRole('EMPLOYER')" id="role-EMPLOYER" class="text-sm px-3 py-1 rounded-full font-medium transition-colors">—</button>
+                    </div>
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <span class="text-sm font-medium text-gray-700">Applicant</span>
+                        <button onclick="toggleRole('APPLICANT')" id="role-APPLICANT" class="text-sm px-3 py-1 rounded-full font-medium transition-colors">—</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+    const USER_ID = '{{ user_id }}';
+    let userData = null;
+
+    async function loadUser() {
+        try {
+            const res = await adminApi(`/admin/users/${USER_ID}`);
+            userData = res.data;
+            renderUser();
+        } catch (err) {
+            showToast('Error', err.message, 'error');
+        }
+    }
+
+    function renderUser() {
+        if (!userData) return;
+        const u = userData;
+        document.getElementById('ud-avatar').src = u.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.full_name || u.email)}&background=random`;
+        document.getElementById('ud-name').textContent = u.full_name || 'Unnamed';
+        document.getElementById('ud-email').textContent = u.email;
+        document.getElementById('ud-phone').textContent = u.phone || '-';
+        document.getElementById('ud-locale').textContent = u.preferred_locale || '-';
+        document.getElementById('ud-created').textContent = formatDate(u.created_at);
+        document.getElementById('ud-updated').textContent = formatDate(u.updated_at);
+
+        const roles = u.roles || [];
+        const badges = roles.map(r => `<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${r === 'ADMIN' ? 'bg-red-100 text-red-800' : r === 'EMPLOYER' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'}">${r}</span>`).join(' ');
+        document.getElementById('ud-badges').innerHTML = badges + ` <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${u.is_blocked ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}">${u.is_blocked ? 'BLOCKED' : u.status}</span>`;
+
+        const btnBlock = document.getElementById('btn-block');
+        if (u.is_blocked) {
+            btnBlock.textContent = 'Unblock';
+            btnBlock.className = 'px-3 py-1.5 text-sm font-medium rounded-lg border border-green-300 text-green-700 hover:bg-green-50 transition-colors';
+        } else {
+            btnBlock.textContent = 'Block';
+            btnBlock.className = 'px-3 py-1.5 text-sm font-medium rounded-lg border border-red-300 text-red-600 hover:bg-red-50 transition-colors';
+        }
+
+        ['ADMIN', 'EMPLOYER', 'APPLICANT'].forEach(role => {
+            const has = roles.includes(role);
+            const el = document.getElementById(`role-${role}`);
+            el.textContent = has ? 'Remove' : 'Add';
+            el.className = `text-sm px-3 py-1 rounded-full font-medium transition-colors ${has ? 'bg-red-100 text-red-700 hover:bg-red-200' : 'bg-green-100 text-green-700 hover:bg-green-200'}`;
+        });
+    }
+
+    async function toggleBlockUser() {
+        if (!userData) return;
+        const next = !userData.is_blocked;
+        const action = next ? 'Block' : 'Unblock';
+        openConfirmModal(
+            `${action} — Confirm`,
+            `Are you sure you want to ${action.toLowerCase()} this user?`,
+            async () => {
+                try {
+                    await adminApi(`/admin/users/${USER_ID}/block`, {
+                        method: 'PATCH',
+                        body: JSON.stringify({ is_blocked: next })
+                    });
+                    showToast('Success', `User ${action.toLowerCase()}ed.`);
+                    loadUser();
+                } catch (err) {
+                    showToast('Error', err.message, 'error');
+                }
+            }
+        );
+    }
+
+    async function toggleRole(role) {
+        if (!userData) return;
+        const has = (userData.roles || []).includes(role);
+        const action = has ? 'remove' : 'add';
+        openConfirmModal(
+            `Role Update — Confirm`,
+            `Are you sure you want to ${has ? 'remove' : 'add'} the ${role} role?`,
+            async () => {
+                try {
+                    await adminApi(`/admin/users/${USER_ID}/role`, {
+                        method: 'PATCH',
+                        body: JSON.stringify({ role, action })
+                    });
+                    showToast('Success', 'Role updated.');
+                    loadUser();
+                } catch (err) {
+                    showToast('Error', err.message, 'error');
+                }
+            }
+        );
+    }
+
+    function confirmDeleteUser() {
+        openConfirmModal(
+            'Delete User — Confirm',
+            'Are you sure you want to delete this user? This action cannot be undone.',
+            async () => {
+                try {
+                    await adminApi(`/admin/users/${USER_ID}`, { method: 'DELETE' });
+                    showToast('Success', 'User deleted.');
+                    setTimeout(() => window.location.href = '/admin/users', 800);
+                } catch (err) {
+                    showToast('Error', err.message, 'error');
+                }
+            }
+        );
+    }
+
+    loadUser();
+</script>
+{% endblock %}

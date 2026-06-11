@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Admin Panel{% endblock %} — JobBoard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        admin: { 50: '#f0fdfa', 100: '#ccfbf1', 200: '#99f6e4', 300: '#5eead4', 400: '#2dd4bf', 500: '#14b8a6', 600: '#0d9488', 700: '#0f766e', 800: '#115e59', 900: '#134e4a' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .sidebar { transition: transform 0.3s ease; }
+        .sidebar.closed { transform: translateX(-100%); }
+        @media (min-width: 1024px) { .sidebar.closed { transform: translateX(0); } }
+        .card-hover { transition: all 0.2s ease; }
+        .card-hover:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(0,0,0,0.08); }
+        .animate-fade-in { animation: fadeIn 0.4s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .skeleton { background: linear-gradient(90deg, #e5e7eb 25%, #d1d5db 50%, #e5e7eb 75%); background-size: 200% 100%; animation: loading 1.5s infinite; }
+        @keyframes loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col lg:flex-row">
+    <!-- Mobile overlay -->
+    <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-40 hidden lg:hidden" onclick="toggleSidebar()"></div>
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="sidebar fixed lg:static inset-y-0 left-0 z-50 w-64 bg-admin-900 text-white flex flex-col shadow-xl lg:shadow-none">
+        <div class="flex items-center justify-between h-16 px-6 border-b border-admin-800">
+            <a href="/admin" class="flex items-center space-x-2">
+                <div class="w-8 h-8 bg-admin-500 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-shield-alt text-white text-sm"></i>
+                </div>
+                <span class="font-bold text-lg tracking-tight">Admin</span>
+            </a>
+            <button class="lg:hidden text-admin-300 hover:text-white" onclick="toggleSidebar()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <nav class="flex-1 overflow-y-auto py-4 px-3 space-y-1">
+            <a href="/admin" class="nav-link flex items-center space-x-3 px-3 py-2.5 rounded-lg text-admin-100 hover:bg-admin-800 hover:text-white transition-colors {% if request.url.path == '/admin' %}bg-admin-800 text-white{% endif %}">
+                <i class="fas fa-chart-pie w-5 text-center"></i>
+                <span class="font-medium">Dashboard</span>
+            </a>
+            <a href="/admin/users" class="nav-link flex items-center space-x-3 px-3 py-2.5 rounded-lg text-admin-100 hover:bg-admin-800 hover:text-white transition-colors {% if request.url.path.startswith('/admin/user') %}bg-admin-800 text-white{% endif %}">
+                <i class="fas fa-users w-5 text-center"></i>
+                <span class="font-medium">Users</span>
+            </a>
+            <a href="/admin/jobs" class="nav-link flex items-center space-x-3 px-3 py-2.5 rounded-lg text-admin-100 hover:bg-admin-800 hover:text-white transition-colors {% if request.url.path.startswith('/admin/job') %}bg-admin-800 text-white{% endif %}">
+                <i class="fas fa-briefcase w-5 text-center"></i>
+                <span class="font-medium">Job Listings</span>
+            </a>
+            <a href="/admin/applications" class="nav-link flex items-center space-x-3 px-3 py-2.5 rounded-lg text-admin-100 hover:bg-admin-800 hover:text-white transition-colors {% if request.url.path == '/admin/applications' %}bg-admin-800 text-white{% endif %}">
+                <i class="fas fa-paper-plane w-5 text-center"></i>
+                <span class="font-medium">Applications</span>
+            </a>
+            <a href="/admin/settings" class="nav-link flex items-center space-x-3 px-3 py-2.5 rounded-lg text-admin-100 hover:bg-admin-800 hover:text-white transition-colors {% if request.url.path == '/admin/settings' %}bg-admin-800 text-white{% endif %}">
+                <i class="fas fa-cog w-5 text-center"></i>
+                <span class="font-medium">Settings</span>
+            </a>
+            <a href="/admin/logs" class="nav-link flex items-center space-x-3 px-3 py-2.5 rounded-lg text-admin-100 hover:bg-admin-800 hover:text-white transition-colors {% if request.url.path == '/admin/logs' %}bg-admin-800 text-white{% endif %}">
+                <i class="fas fa-clipboard-list w-5 text-center"></i>
+                <span class="font-medium">Logs</span>
+            </a>
+        </nav>
+        <div class="p-4 border-t border-admin-800">
+            <a href="/" class="flex items-center space-x-3 px-3 py-2.5 rounded-lg text-admin-100 hover:bg-admin-800 hover:text-white transition-colors">
+                <i class="fas fa-arrow-left w-5 text-center"></i>
+                <span class="font-medium">Back to Site</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col min-w-0">
+        <!-- Header -->
+        <header class="bg-white border-b border-gray-200 h-16 flex items-center justify-between px-4 lg:px-8 sticky top-0 z-30">
+            <div class="flex items-center space-x-4">
+                <button onclick="toggleSidebar()" class="lg:hidden p-2 text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+                <h1 class="text-xl font-bold text-gray-900 hidden sm:block">{% block page_title %}Dashboard{% endblock %}</h1>
+            </div>
+            <div class="flex items-center space-x-4">
+                <div class="flex items-center space-x-2">
+                    <img id="admin-avatar" src="https://ui-avatars.com/api/?name=Admin&background=0d9488&color=fff" class="w-8 h-8 rounded-full" alt="Admin">
+                    <span id="admin-name" class="hidden sm:block text-sm font-medium text-gray-700">Admin</span>
+                </div>
+                <button onclick="adminLogout()" class="p-2 text-gray-400 hover:text-red-600 transition-colors" title="Logout">
+                    <i class="fas fa-sign-out-alt text-lg"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Page Content -->
+        <main class="flex-1 p-4 lg:p-8 overflow-x-auto">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="fixed bottom-4 right-4 z-50 hidden">
+        <div class="bg-white rounded-xl shadow-2xl border-l-4 border-admin-500 p-4 flex items-center space-x-3 max-w-sm">
+            <div id="toast-icon" class="w-10 h-10 rounded-full bg-admin-100 flex items-center justify-center">
+                <i class="fas fa-check text-admin-600"></i>
+            </div>
+            <div>
+                <p id="toast-title" class="font-semibold text-gray-900">Success</p>
+                <p id="toast-message" class="text-sm text-gray-500">Operation completed.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirm Modal -->
+    <div id="confirm-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/50 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 p-6 animate-fade-in">
+            <div class="flex items-center space-x-3 mb-4">
+                <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
+                    <i class="fas fa-exclamation-triangle text-red-600"></i>
+                </div>
+                <h3 id="confirm-title" class="text-lg font-bold text-gray-900">Confirm</h3>
+            </div>
+            <p id="confirm-message" class="text-gray-600 mb-6">Are you sure you want to proceed?</p>
+            <div class="flex justify-end space-x-3">
+                <button onclick="closeConfirmModal()" class="px-4 py-2 text-gray-600 font-medium hover:bg-gray-100 rounded-lg transition-colors">Cancel</button>
+                <button id="confirm-btn" class="px-4 py-2 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 transition-colors">Yes</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = '/api/v1';
+
+        function getAdminAuth() {
+            let user = JSON.parse(localStorage.getItem('user') || 'null');
+            let token = localStorage.getItem('token');
+            if (!user || !token) {
+                user = JSON.parse(sessionStorage.getItem('user') || 'null');
+                token = sessionStorage.getItem('token');
+            }
+            return { user, token };
+        }
+
+        function checkAdminAuth() {
+            const { user, token } = getAdminAuth();
+            if (!user || !token) {
+                window.location.href = '/admin/login';
+                return false;
+            }
+            const roles = user.roles || [];
+            if (!roles.includes('ADMIN')) {
+                window.location.href = '/';
+                return false;
+            }
+            document.getElementById('admin-name').textContent = user.full_name || 'Admin';
+            if (user.avatar_url) {
+                document.getElementById('admin-avatar').src = user.avatar_url;
+            } else {
+                document.getElementById('admin-avatar').src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.full_name || 'Admin')}&background=0d9488&color=fff`;
+            }
+            return true;
+        }
+
+        function adminLogout() {
+            localStorage.removeItem('user');
+            localStorage.removeItem('token');
+            sessionStorage.removeItem('user');
+            sessionStorage.removeItem('token');
+            window.location.href = '/admin/login';
+        }
+
+        async function adminApi(endpoint, options = {}) {
+            const url = `${API_URL}${endpoint}`;
+            const { token } = getAdminAuth();
+            const headers = { 'Content-Type': 'application/json', ...options.headers };
+            if (token && !headers.Authorization) {
+                headers.Authorization = `Bearer ${token}`;
+            }
+            const response = await fetch(url, { ...options, headers });
+            const text = await response.text();
+            const data = text ? JSON.parse(text) : { data: null, meta: {}, errors: [] };
+            if (!response.ok) {
+                const code = data.errors?.[0]?.code;
+                if (response.status === 401 || code === 'TOKEN_EXPIRED' || code === 'AUTH_REQUIRED') {
+                    adminLogout();
+                }
+                throw new Error(data.errors?.[0]?.message || 'An error occurred');
+            }
+            return data;
+        }
+
+        function showToast(title, message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const iconDiv = document.getElementById('toast-icon');
+            const icon = iconDiv.querySelector('i');
+            const bar = toast.querySelector('.bg-white');
+            document.getElementById('toast-title').textContent = title;
+            document.getElementById('toast-message').textContent = message;
+            if (type === 'error') {
+                iconDiv.className = 'w-10 h-10 rounded-full bg-red-100 flex items-center justify-center';
+                icon.className = 'fas fa-exclamation text-red-600';
+                bar.classList.remove('border-admin-500');
+                bar.classList.add('border-red-500');
+            } else {
+                iconDiv.className = 'w-10 h-10 rounded-full bg-admin-100 flex items-center justify-center';
+                icon.className = 'fas fa-check text-admin-600';
+                bar.classList.remove('border-red-500');
+                bar.classList.add('border-admin-500');
+            }
+            toast.classList.remove('hidden');
+            setTimeout(() => toast.classList.add('hidden'), 4000);
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            sidebar.classList.toggle('closed');
+            if (window.innerWidth < 1024) {
+                overlay.classList.toggle('hidden');
+            }
+        }
+
+        let confirmCallback = null;
+        function openConfirmModal(title, message, onConfirm) {
+            document.getElementById('confirm-title').textContent = title;
+            document.getElementById('confirm-message').textContent = message;
+            confirmCallback = onConfirm;
+            const modal = document.getElementById('confirm-modal');
+            modal.classList.remove('hidden');
+            const btn = document.getElementById('confirm-btn');
+            btn.onclick = () => {
+                closeConfirmModal();
+                if (confirmCallback) confirmCallback();
+            };
+        }
+        function closeConfirmModal() {
+            document.getElementById('confirm-modal').classList.add('hidden');
+            confirmCallback = null;
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return '-';
+            const d = new Date(dateString);
+            return d.toLocaleDateString('en-US', { day: '2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Auto check auth on admin pages (skip login page)
+        if (!window.location.pathname.includes('/admin/login')) {
+            checkAdminAuth();
+        }
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

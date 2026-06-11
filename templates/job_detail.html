@@ -1,0 +1,613 @@
+{% extends "base.html" %}
+
+{% block title %}Job Detail - JobBoard{% endblock %}
+
+{% block content %}
+<!-- Breadcrumb -->
+<div class="bg-white border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <nav class="flex items-center text-sm text-gray-500">
+            <a href="/" class="hover:text-primary-600 transition" data-i18n="breadcrumb.home">Home</a>
+            <i class="fas fa-chevron-right mx-2 text-xs"></i>
+            <a href="/jobs" class="hover:text-primary-600 transition" data-i18n="breadcrumb.jobs">Job Listings</a>
+            <i class="fas fa-chevron-right mx-2 text-xs"></i>
+            <span class="text-gray-900 font-medium truncate" id="breadcrumb-title">Loading...</span>
+        </nav>
+    </div>
+</div>
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="flex flex-col lg:flex-row gap-8">
+        <!-- Main Content -->
+        <div class="flex-1">
+            <!-- Job Header -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8 mb-6">
+                <div class="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                    <div class="flex items-start gap-5">
+                        <div id="job-logo" class="w-20 h-20 bg-gradient-to-br from-primary-100 to-cyan-100 rounded-2xl flex items-center justify-center text-primary-600 font-bold text-3xl flex-shrink-0">
+                            <i class="fas fa-briefcase"></i>
+                        </div>
+                        <div>
+                            <h1 id="job-title" class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Loading...</h1>
+                            <div class="flex flex-wrap items-center gap-3 text-sm text-gray-500">
+                                <span id="job-location"><i class="fas fa-map-marker-alt mr-1"></i> -</span>
+                                <span class="w-1 h-1 bg-gray-300 rounded-full"></span>
+                                <span id="job-type"><i class="fas fa-clock mr-1"></i> -</span>
+                                <span class="w-1 h-1 bg-gray-300 rounded-full"></span>
+                                <span id="job-date"><i class="far fa-calendar mr-1"></i> -</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col items-end gap-3">
+                        <span id="job-status" class="px-4 py-1.5 rounded-full text-sm font-medium bg-gray-100 text-gray-600" data-i18n="job.loading">Loading</span>
+                        <div id="match-score-badge" class="hidden flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-bold">
+                            <i class="fas fa-bullseye"></i>
+                            <span id="match-score-text"></span>
+                        </div>
+                        <button id="edit-job-btn" onclick="openEditModal()" class="hidden px-4 py-2 bg-primary-600 text-white text-sm font-medium rounded-xl hover:bg-primary-700 transition">
+                            <i class="fas fa-pencil-alt mr-2"></i> Edit Job
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="flex flex-wrap gap-3 mt-6 pt-6 border-t border-gray-100">
+                    <div class="flex items-center gap-2 px-4 py-2 bg-primary-50 rounded-xl">
+                        <i class="fas fa-money-bill-wave text-primary-600"></i>
+                        <span id="job-salary" class="font-semibold text-primary-700">-</span>
+                    </div>
+                    <div class="flex items-center gap-2 px-4 py-2 bg-gray-50 rounded-xl">
+                        <i class="fas fa-briefcase text-gray-600"></i>
+                        <span id="job-workplace" class="text-gray-700">-</span>
+                    </div>
+                    <div class="flex items-center gap-2 px-4 py-2 bg-gray-50 rounded-xl">
+                        <i class="fas fa-layer-group text-gray-600"></i>
+                        <span id="job-level" class="text-gray-700">-</span>
+                    </div>
+                    <div id="job-remote-badge" class="hidden flex items-center gap-2 px-4 py-2 bg-green-50 rounded-xl">
+                        <i class="fas fa-wifi text-green-600"></i>
+                        <span class="text-green-700 font-medium">Remote Work</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Job Description -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8 mb-6">
+                <h2 class="text-xl font-bold text-gray-900 mb-4" data-i18n="job.description_title">Job Description</h2>
+                <div id="job-description" class="prose prose-gray max-w-none text-gray-600 leading-relaxed">
+                    <div class="skeleton h-4 w-full rounded mb-2"></div>
+                    <div class="skeleton h-4 w-5/6 rounded mb-2"></div>
+                    <div class="skeleton h-4 w-4/6 rounded"></div>
+                </div>
+            </div>
+
+            <!-- Required Skills -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8 mb-6">
+                <h2 class="text-xl font-bold text-gray-900 mb-4" data-i18n="job.skills_title">Required Skills</h2>
+                <div id="job-skills" class="flex flex-wrap gap-2">
+                    <div class="skeleton h-8 w-24 rounded-lg"></div>
+                    <div class="skeleton h-8 w-32 rounded-lg"></div>
+                    <div class="skeleton h-8 w-28 rounded-lg"></div>
+                </div>
+            </div>
+
+            <!-- Employer Info -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
+                <h2 class="text-xl font-bold text-gray-900 mb-4" data-i18n="job.employer_title">About the Employer</h2>
+                <div id="employer-info" class="flex items-center gap-4">
+                    <div class="skeleton w-16 h-16 rounded-xl"></div>
+                    <div class="flex-1">
+                        <div class="skeleton h-5 w-1/3 rounded mb-2"></div>
+                        <div class="skeleton h-4 w-1/4 rounded"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <aside class="w-full lg:w-80 flex-shrink-0">
+            <div class="sticky top-24 space-y-6">
+                <!-- Apply Card -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                    <h3 class="font-semibold text-gray-900 mb-4" data-i18n="sidebar.apply_card_title">Apply for This Job</h3>
+                    <p class="text-sm text-gray-500 mb-4 applicant-only" data-i18n="sidebar.apply_card_sub">Complete your profile to strengthen your application.</p>
+                    <p class="text-sm text-gray-500 mb-4 guest-only hidden" data-i18n="sidebar.apply_card_sub_guest">Login to apply for this position.</p>
+                    <button onclick="openApplyModal()" id="apply-btn" class="applicant-only w-full btn-primary py-3 text-white font-semibold rounded-xl mb-3" data-i18n="sidebar.apply_now">Apply Now</button>
+                    <button onclick="window.location.href='/login'" class="guest-only hidden w-full btn-primary py-3 text-white font-semibold rounded-xl mb-3" data-i18n="sidebar.login_to_apply">Login</button>
+                    <button onclick="saveJob()" id="save-btn" class="applicant-only w-full px-4 py-3 border border-gray-200 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition flex items-center justify-center gap-2" data-i18n="sidebar.save_job"><i class="far fa-bookmark"></i> Save Job</button>
+                </div>
+
+                <!-- Similar Jobs -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                    <h3 class="font-semibold text-gray-900 mb-4" data-i18n="sidebar.similar_jobs">Similar Jobs</h3>
+                    <div id="similar-jobs" class="space-y-4">
+                        <div class="skeleton h-16 w-full rounded-xl"></div>
+                        <div class="skeleton h-16 w-full rounded-xl"></div>
+                        <div class="skeleton h-16 w-full rounded-xl"></div>
+                    </div>
+                </div>
+
+                <!-- Share -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                    <h3 class="font-semibold text-gray-900 mb-4" data-i18n="sidebar.share">Share</h3>
+                    <div class="flex gap-3">
+                        <button onclick="share('twitter')" class="flex-1 py-2.5 bg-sky-500 text-white rounded-xl hover:bg-sky-600 transition">
+                            <i class="fab fa-twitter"></i>
+                        </button>
+                        <button onclick="share('linkedin')" class="flex-1 py-2.5 bg-blue-700 text-white rounded-xl hover:bg-blue-800 transition">
+                            <i class="fab fa-linkedin-in"></i>
+                        </button>
+                        <button onclick="share('copy')" class="flex-1 py-2.5 bg-gray-100 text-gray-600 rounded-xl hover:bg-gray-200 transition">
+                            <i class="fas fa-link"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </div>
+</div>
+
+<!-- Edit Job Modal -->
+<div id="edit-modal" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeEditModal()"></div>
+    <div class="absolute inset-0 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto animate-fade-in">
+            <div class="p-6 border-b border-gray-100 flex items-center justify-between">
+                <h3 class="text-xl font-bold text-gray-900">Edit Job Listing</h3>
+                <button onclick="closeEditModal()" class="w-8 h-8 rounded-lg hover:bg-gray-100 flex items-center justify-center transition">
+                    <i class="fas fa-times text-gray-500"></i>
+                </button>
+            </div>
+            <div class="p-6">
+                <form id="edit-form" onsubmit="submitEdit(event)">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Title</label>
+                        <input type="text" id="edit-title" required
+                            class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                        <textarea id="edit-description" rows="5" required
+                            class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition resize-none"></textarea>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">City</label>
+                            <input type="text" id="edit-city"
+                                class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Country</label>
+                            <input type="text" id="edit-country"
+                                class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Min Salary</label>
+                            <input type="number" id="edit-salary-min"
+                                class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Max Salary</label>
+                            <input type="number" id="edit-salary-max"
+                                class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Currency</label>
+                            <select id="edit-currency" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition">
+                                <option value="TRY">TRY</option>
+                                <option value="USD">USD</option>
+                                <option value="EUR">EUR</option>
+                                <option value="GBP">GBP</option>
+                                <option value="EGP">EGP</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Workplace Type</label>
+                            <select id="edit-workplace" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition">
+                                <option value="">Select</option>
+                                <option value="ONSITE">On-site</option>
+                                <option value="REMOTE">Remote</option>
+                                <option value="HYBRID">Hybrid</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Job Type</label>
+                            <select id="edit-job-type" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition">
+                                <option value="">Select</option>
+                                <option value="FULL_TIME">Full-time</option>
+                                <option value="PART_TIME">Part-time</option>
+                                <option value="CONTRACT">Contract</option>
+                                <option value="FREELANCE">Freelance</option>
+                                <option value="INTERNSHIP">Internship</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                        <select id="edit-status" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition">
+                            <option value="DRAFT">Draft</option>
+                            <option value="OPEN">Open</option>
+                            <option value="HIDDEN">Hidden</option>
+                            <option value="CANCELLED">Cancelled</option>
+                        </select>
+                    </div>
+                    <button type="submit" id="submit-edit-btn" class="w-full btn-primary py-3 text-white font-semibold rounded-xl">
+                        <i class="fas fa-save mr-2"></i> Save Changes
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Apply Modal -->
+<div id="apply-modal" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeApplyModal()"></div>
+    <div class="absolute inset-0 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto animate-fade-in">
+                <div class="p-6 border-b border-gray-100 flex items-center justify-between">
+                <h3 class="text-xl font-bold text-gray-900" data-i18n="modal.title">Job Application</h3>
+                <button onclick="closeApplyModal()" class="w-8 h-8 rounded-lg hover:bg-gray-100 flex items-center justify-center transition">
+                    <i class="fas fa-times text-gray-500"></i>
+                </button>
+            </div>
+            <div class="p-6">
+                <div id="apply-job-info" class="bg-gray-50 rounded-xl p-4 mb-6">
+                    <p class="font-medium text-gray-900" id="modal-job-title">-</p>
+                    <p class="text-sm text-gray-500 mt-1" id="modal-job-company">-</p>
+                </div>
+                <form id="apply-form" onsubmit="submitApplication(event)">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2" data-i18n="modal.cover_letter_label">Cover Letter</label>
+                        <textarea id="cover-letter" rows="5" data-i18n-placeholder="modal.cover_letter_placeholder" placeholder="Briefly explain why you are suitable for this position..." 
+                            class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition resize-none"></textarea>
+                    </div>
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2" data-i18n="modal.proposed_salary_label">Proposed Salary Optional</label>
+                        <div class="flex gap-3">
+                            <input type="number" id="proposed-amount" data-i18n-placeholder="modal.amount_placeholder" placeholder="Amount" 
+                                class="flex-1 px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition">
+                            <select id="proposed-currency" class="px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition">
+                                <option value="TRY">TRY</option>
+                                <option value="USD">USD</option>
+                                <option value="EUR">EUR</option>
+                                <option value="GBP">GBP</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button type="submit" id="submit-apply-btn" class="w-full btn-primary py-3 text-white font-semibold rounded-xl" data-i18n="modal.submit_apply"><i class="fas fa-paper-plane mr-2"></i> Submit Application</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const jobId = '{{ job_id }}';
+    let currentJob = null;
+
+    async function loadJob() {
+        try {
+            const data = await api(`/jobs/${jobId}`);
+            currentJob = data.data;
+            renderJob(currentJob);
+            loadSimilarJobs(currentJob);
+            updateUIForRole();
+        } catch (err) {
+            document.getElementById('job-title').textContent = 'Listing not found';
+            document.getElementById('job-description').innerHTML = `<p class="text-red-500">${err.message}</p>`;
+        }
+    }
+
+    function renderJob(job) {
+        document.getElementById('breadcrumb-title').textContent = job.title;
+        document.getElementById('job-title').textContent = job.title;
+        document.getElementById('job-logo').textContent = (job.title || 'J').charAt(0);
+        
+        const location = [job.city, job.country].filter(Boolean).join(', ');
+        document.getElementById('job-location').innerHTML = `<i class="fas fa-map-marker-alt mr-1"></i> ${location || 'Not specified'}`;
+        document.getElementById('job-type').innerHTML = `<i class="fas fa-clock mr-1"></i> ${job.job_type || 'Not specified'}`;
+        document.getElementById('job-date').innerHTML = `<i class="far fa-calendar mr-1"></i> ${timeAgo(job.created_at)}`;
+        
+        let statusBadge;
+        if (job.availability?.status === 'AVAILABLE') {
+            statusBadge = '<span class="px-4 py-1.5 rounded-full text-sm font-medium bg-green-100 text-green-700">Open</span>';
+        } else if (job.availability?.status === 'TAKEN') {
+            statusBadge = '<span class="px-4 py-1.5 rounded-full text-sm font-medium bg-yellow-100 text-yellow-700">Filled</span>';
+        } else {
+            statusBadge = '<span class="px-4 py-1.5 rounded-full text-sm font-medium bg-gray-100 text-gray-600">Closed</span>';
+        }
+        document.getElementById('job-status').outerHTML = statusBadge;
+        
+        document.getElementById('job-salary').textContent = formatSalary(job.salary?.min_minor, job.salary?.max_minor, job.salary?.currency, job.salary?.period);
+        document.getElementById('job-workplace').textContent = job.workplace_type || 'Not specified';
+        document.getElementById('job-level').textContent = job.career_level || 'Not specified';
+        
+        if (job.remote_allowed) {
+            document.getElementById('job-remote-badge').classList.remove('hidden');
+            document.getElementById('job-remote-badge').classList.add('flex');
+        }
+        
+        document.getElementById('job-description').textContent = job.description || 'No description available.';
+        
+        // Skills
+        const skillsContainer = document.getElementById('job-skills');
+        if (job.required_skills && job.required_skills.length > 0) {
+            skillsContainer.innerHTML = job.required_skills.map(skill => `
+                <span class="px-3 py-1.5 bg-primary-50 text-primary-700 rounded-lg text-sm font-medium border border-primary-100">
+                    ${skill.name}
+                    ${skill.required_level ? `<span class="text-primary-400 ml-1">Lv.${skill.required_level}</span>` : ''}
+                    ${skill.must_have ? '<span class="text-red-500 ml-1">*</span>' : ''}
+                </span>
+            `).join('');
+        } else {
+            skillsContainer.innerHTML = '<p class="text-gray-500 text-sm">Not specified</p>';
+        }
+        
+        // Employer info placeholder
+        document.getElementById('employer-info').innerHTML = `
+            <div class="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl flex items-center justify-center text-gray-500 font-bold text-xl">
+                <i class="fas fa-building"></i>
+            </div>
+            <div>
+                <p class="font-semibold text-gray-900">Company Information</p>
+                <p class="text-sm text-gray-500">Employer profile access coming soon</p>
+            </div>
+        `;
+        
+        // Modal info
+        document.getElementById('modal-job-title').textContent = job.title;
+        document.getElementById('modal-job-company').textContent = location || 'Remote';
+        
+        // Hide apply button if job is not available
+        const applyBtn = document.getElementById('apply-btn');
+        if (applyBtn && job.availability?.status !== 'AVAILABLE') {
+            applyBtn.classList.add('hidden');
+        }
+
+        // Match score badge
+        if (job.match_score !== null && job.match_score !== undefined) {
+            const badge = document.getElementById('match-score-badge');
+            const text = document.getElementById('match-score-text');
+
+            let colorClass = '';
+            if (job.match_score >= 80) {
+                colorClass = 'bg-green-100 text-green-700';
+            } else if (job.match_score >= 50) {
+                colorClass = 'bg-yellow-100 text-yellow-700';
+            } else {
+                colorClass = 'bg-red-100 text-red-700';
+            }
+
+            badge.className = `flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-bold ${colorClass}`;
+            badge.classList.remove('hidden');
+            text.textContent = `${job.match_score}% Match`;
+        }
+    }
+
+    async function loadSimilarJobs(job) {
+        try {
+            const data = await api(`/jobs?limit=10&job_type=${job.job_type || ''}`);
+            const jobs = (data.data || []).filter(j => j.id !== job.id && j.availability?.status === 'AVAILABLE').slice(0, 3);
+            const container = document.getElementById('similar-jobs');
+            
+            if (jobs.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 text-sm text-center py-4">No similar listings found.</p>';
+                return;
+            }
+            
+            container.innerHTML = jobs.map(j => `
+                <a href="/jobs/${j.id}" class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition">
+                    <div class="w-10 h-10 bg-gradient-to-br from-primary-100 to-cyan-100 rounded-lg flex items-center justify-center text-primary-600 font-bold text-sm flex-shrink-0">
+                        ${(j.title || 'J').charAt(0)}
+                    </div>
+                    <div class="min-w-0">
+                        <p class="font-medium text-gray-900 text-sm truncate">${j.title}</p>
+                        <p class="text-xs text-gray-500">${formatSalary(j.salary?.min_minor, j.salary?.max_minor, j.salary?.currency, j.salary?.period)}</p>
+                    </div>
+                </a>
+            `).join('');
+        } catch (e) {
+            console.error('Error loading similar jobs:', e);
+        }
+    }
+
+    function openApplyModal() {
+        const { user } = getAuthFromStorage();
+        if (!user) {
+            showToast('Login Required', 'Please log in to apply.', 'error');
+            setTimeout(() => window.location.href = '/login', 1500);
+            return;
+        }
+        if (currentJob && currentJob.availability?.status !== 'AVAILABLE') {
+            showToast('Applications Closed', 'This listing is no longer open.', 'error');
+            return;
+        }
+        document.getElementById('apply-modal').classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeApplyModal() {
+        document.getElementById('apply-modal').classList.add('hidden');
+        document.body.style.overflow = '';
+    }
+
+    async function submitApplication(e) {
+        e.preventDefault();
+        const { user } = getAuthFromStorage();
+        if (!user) return;
+        
+        const btn = document.getElementById('submit-apply-btn');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Sending...';
+        
+        try {
+            await api(`/jobs/${jobId}/applications`, {
+                method: 'POST',
+                body: JSON.stringify({
+                    cover_letter: document.getElementById('cover-letter').value,
+                    proposed_amount_minor: document.getElementById('proposed-amount').value || null,
+                    proposed_currency: document.getElementById('proposed-currency').value
+                })
+            });
+            showToast('Application Submitted', 'Your application has been received successfully.');
+            closeApplyModal();
+        } catch (err) {
+            showToast('Error', err.message, 'error');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-paper-plane mr-2"></i> Submit Application';
+        }
+    }
+
+    async function checkSavedStatus() {
+        const { user, token } = getAuthFromStorage();
+        if (!user || !token) return;
+        try {
+            const data = await api('/saved-jobs');
+            const savedJobs = data.data || [];
+            const isSaved = savedJobs.some(item => item.job_id === jobId);
+            const btn = document.getElementById('save-btn');
+            if (isSaved) {
+                btn.innerHTML = '<i class="fas fa-bookmark text-primary-600"></i> Saved';
+                btn.dataset.saved = 'true';
+            } else {
+                btn.innerHTML = '<i class="far fa-bookmark"></i> Save Job';
+                btn.dataset.saved = 'false';
+            }
+        } catch (err) {
+            console.error('Error checking saved status:', err);
+        }
+    }
+
+    async function saveJob() {
+        const { user, token } = getAuthFromStorage();
+        if (!user || !token) {
+            showToast('Login Required', 'Please log in to save jobs.', 'error');
+            setTimeout(() => window.location.href = '/login', 1500);
+            return;
+        }
+        const btn = document.getElementById('save-btn');
+        const isSaved = btn.dataset.saved === 'true';
+        try {
+            if (isSaved) {
+                await api(`/saved-jobs/${jobId}`, { method: 'DELETE' });
+                btn.innerHTML = '<i class="far fa-bookmark"></i> Save Job';
+                btn.dataset.saved = 'false';
+                showToast('Removed', 'Job removed from saved jobs.');
+            } else {
+                await api(`/saved-jobs`, {
+                    method: 'POST',
+                    body: JSON.stringify({ job_id: jobId })
+                });
+                btn.innerHTML = '<i class="fas fa-bookmark text-primary-600"></i> Saved';
+                btn.dataset.saved = 'true';
+                showToast('Saved', 'The listing has been added to your saved jobs.');
+            }
+        } catch (err) {
+            showToast('Error', err.message, 'error');
+        }
+    }
+
+    function share(platform) {
+        const url = window.location.href;
+        const title = currentJob?.title || 'Job Listing';
+        
+        switch(platform) {
+            case 'twitter':
+                window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(url)}`, '_blank');
+                break;
+            case 'linkedin':
+                window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`, '_blank');
+                break;
+            case 'copy':
+                navigator.clipboard.writeText(url);
+                showToast('Copied', 'The link has been copied to your clipboard.');
+                break;
+        }
+    }
+
+    function updateUIForRole() {
+        const { user } = getAuthFromStorage();
+        if (!user || !currentJob) return;
+
+        const isOwner = String(user.id) === String(currentJob.owner_user_id);
+        const isEmployer = Array.isArray(user.roles) && user.roles.includes('EMPLOYER');
+
+        // Show edit button for employer owner
+        const editBtn = document.getElementById('edit-job-btn');
+        if (editBtn && isEmployer && isOwner) {
+            editBtn.classList.remove('hidden');
+        }
+
+        // Hide applicant-only elements for employers
+        if (isEmployer) {
+            document.querySelectorAll('.applicant-only').forEach(el => el.classList.add('hidden'));
+        }
+    }
+
+    function openEditModal() {
+        if (!currentJob) return;
+        document.getElementById('edit-title').value = currentJob.title || '';
+        document.getElementById('edit-description').value = currentJob.description || '';
+        document.getElementById('edit-city').value = currentJob.city || '';
+        document.getElementById('edit-country').value = currentJob.country || '';
+        document.getElementById('edit-salary-min').value = currentJob.salary?.min_minor ?? '';
+        document.getElementById('edit-salary-max').value = currentJob.salary?.max_minor ?? '';
+        document.getElementById('edit-currency').value = currentJob.salary?.currency || 'TRY';
+        document.getElementById('edit-workplace').value = currentJob.workplace_type || '';
+        document.getElementById('edit-job-type').value = currentJob.job_type || '';
+        document.getElementById('edit-status').value = currentJob.status || 'DRAFT';
+        document.getElementById('edit-modal').classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeEditModal() {
+        document.getElementById('edit-modal').classList.add('hidden');
+        document.body.style.overflow = '';
+    }
+
+    async function submitEdit(e) {
+        e.preventDefault();
+        const btn = document.getElementById('submit-edit-btn');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Saving...';
+
+        const payload = {
+            title: document.getElementById('edit-title').value,
+            description: document.getElementById('edit-description').value,
+            city: document.getElementById('edit-city').value || null,
+            country: document.getElementById('edit-country').value || null,
+            salary_min_minor: document.getElementById('edit-salary-min').value ? Number(document.getElementById('edit-salary-min').value) : null,
+            salary_max_minor: document.getElementById('edit-salary-max').value ? Number(document.getElementById('edit-salary-max').value) : null,
+            currency: document.getElementById('edit-currency').value,
+            workplace_type: document.getElementById('edit-workplace').value || null,
+            job_type: document.getElementById('edit-job-type').value || null,
+            status: document.getElementById('edit-status').value,
+        };
+
+        try {
+            await api(`/jobs/${jobId}`, {
+                method: 'PATCH',
+                body: JSON.stringify(payload)
+            });
+            showToast('Success', 'Job listing updated successfully.');
+            closeEditModal();
+            loadJob();
+        } catch (err) {
+            showToast('Error', err.message, 'error');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-save mr-2"></i> Save Changes';
+        }
+    }
+
+    loadJob();
+    checkSavedStatus();
+</script>
+{% endblock %}

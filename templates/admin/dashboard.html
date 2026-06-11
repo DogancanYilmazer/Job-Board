@@ -1,0 +1,148 @@
+{% extends "admin/admin_base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+{% block content %}
+<div class="space-y-6 animate-fade-in">
+    <!-- Stats Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
+        <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100 card-hover">
+            <div class="flex items-center justify-between mb-3">
+                <div class="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center">
+                    <i class="fas fa-users text-blue-600"></i>
+                </div>
+                <span class="text-xs font-medium text-green-600 bg-green-50 px-2 py-0.5 rounded-full">All Time</span>
+            </div>
+            <p class="text-2xl font-bold text-gray-900" id="stat-total-users">—</p>
+            <p class="text-sm text-gray-500">Total Users</p>
+        </div>
+        <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100 card-hover">
+            <div class="flex items-center justify-between mb-3">
+                <div class="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center">
+                    <i class="fas fa-user-plus text-green-600"></i>
+                </div>
+                <span class="text-xs font-medium text-green-600 bg-green-50 px-2 py-0.5 rounded-full">Last 7 Days</span>
+            </div>
+            <p class="text-2xl font-bold text-gray-900" id="stat-new-users">—</p>
+            <p class="text-sm text-gray-500">New Registrations</p>
+        </div>
+        <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100 card-hover">
+            <div class="flex items-center justify-between mb-3">
+                <div class="w-10 h-10 rounded-lg bg-purple-50 flex items-center justify-center">
+                    <i class="fas fa-user-check text-purple-600"></i>
+                </div>
+            </div>
+            <p class="text-2xl font-bold text-gray-900" id="stat-active-users">—</p>
+            <p class="text-sm text-gray-500">Active Users</p>
+        </div>
+        <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100 card-hover">
+            <div class="flex items-center justify-between mb-3">
+                <div class="w-10 h-10 rounded-lg bg-red-50 flex items-center justify-center">
+                    <i class="fas fa-user-slash text-red-600"></i>
+                </div>
+            </div>
+            <p class="text-2xl font-bold text-gray-900" id="stat-blocked-users">—</p>
+            <p class="text-sm text-gray-500">Blocked Users</p>
+        </div>
+        <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100 card-hover">
+            <div class="flex items-center justify-between mb-3">
+                <div class="w-10 h-10 rounded-lg bg-orange-50 flex items-center justify-center">
+                    <i class="fas fa-briefcase text-orange-600"></i>
+                </div>
+            </div>
+            <p class="text-2xl font-bold text-gray-900" id="stat-total-jobs">—</p>
+            <p class="text-sm text-gray-500">Total Job Listings</p>
+        </div>
+        <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100 card-hover">
+            <div class="flex items-center justify-between mb-3">
+                <div class="w-10 h-10 rounded-lg bg-indigo-50 flex items-center justify-center">
+                    <i class="fas fa-paper-plane text-indigo-600"></i>
+                </div>
+            </div>
+            <p class="text-2xl font-bold text-gray-900" id="stat-total-applications">—</p>
+            <p class="text-sm text-gray-500">Total Applications</p>
+        </div>
+        <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100 card-hover">
+            <div class="flex items-center justify-between mb-3">
+                <div class="w-10 h-10 rounded-lg bg-pink-50 flex items-center justify-center">
+                    <i class="fas fa-file-contract text-pink-600"></i>
+                </div>
+            </div>
+            <p class="text-2xl font-bold text-gray-900" id="stat-total-contracts">—</p>
+            <p class="text-sm text-gray-500">Contracts</p>
+        </div>
+        <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100 card-hover">
+            <div class="flex items-center justify-between mb-3">
+                <div class="w-10 h-10 rounded-lg bg-teal-50 flex items-center justify-center">
+                    <i class="fas fa-handshake text-teal-600"></i>
+                </div>
+            </div>
+            <p class="text-2xl font-bold text-gray-900" id="stat-total-offers">—</p>
+            <p class="text-sm text-gray-500">Offers</p>
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+            <h2 class="font-bold text-gray-900">Recent Admin Activities</h2>
+            <a href="/admin/logs" class="text-sm text-admin-600 hover:text-admin-700 font-medium">View All</a>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left">
+                <thead class="bg-gray-50 text-gray-500 text-xs uppercase">
+                    <tr>
+                        <th class="px-6 py-3 font-medium">Date</th>
+                        <th class="px-6 py-3 font-medium">Admin</th>
+                        <th class="px-6 py-3 font-medium">Action</th>
+                        <th class="px-6 py-3 font-medium">Description</th>
+                    </tr>
+                </thead>
+                <tbody id="recent-logs" class="divide-y divide-gray-100 text-sm">
+                    <tr><td colspan="4" class="px-6 py-8 text-center text-gray-400">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+    async function loadDashboard() {
+        try {
+            const [statsRes, logsRes] = await Promise.all([
+                adminApi('/admin/dashboard/stats'),
+                adminApi('/admin/logs?limit=5')
+            ]);
+            const stats = statsRes.data;
+            document.getElementById('stat-total-users').textContent = stats.total_users;
+            document.getElementById('stat-new-users').textContent = stats.new_users_7d;
+            document.getElementById('stat-active-users').textContent = stats.active_users;
+            document.getElementById('stat-blocked-users').textContent = stats.blocked_users;
+            document.getElementById('stat-total-jobs').textContent = stats.total_jobs;
+            document.getElementById('stat-total-applications').textContent = stats.total_applications;
+            document.getElementById('stat-total-contracts').textContent = stats.total_contracts;
+            document.getElementById('stat-total-offers').textContent = stats.total_offers;
+
+            const logs = logsRes.data || [];
+            const tbody = document.getElementById('recent-logs');
+            if (logs.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="px-6 py-8 text-center text-gray-400">No activity yet.</td></tr>';
+                return;
+            }
+            tbody.innerHTML = logs.map(log => `
+                <tr class="hover:bg-gray-50 transition-colors">
+                    <td class="px-6 py-3 text-gray-600">${formatDate(log.created_at)}</td>
+                    <td class="px-6 py-3 font-medium text-gray-900">${escapeHtml(log.admin_name || 'System')}</td>
+                    <td class="px-6 py-3">
+                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-admin-100 text-admin-800">${escapeHtml(log.action_type)}</span>
+                    </td>
+                    <td class="px-6 py-3 text-gray-600">${escapeHtml(log.description || '-')}</td>
+                </tr>
+            `).join('');
+        } catch (err) {
+            showToast('Error', err.message, 'error');
+        }
+    }
+    loadDashboard();
+</script>
+{% endblock %}

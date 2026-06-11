@@ -1,0 +1,264 @@
+{% extends "base.html" %}
+
+{% block title %}Register - JobBoard{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-primary-50 to-cyan-50">
+    <div class="max-w-lg w-full">
+        <!-- Logo -->
+        <div class="text-center mb-8">
+            <a href="/" class="inline-flex items-center space-x-2">
+                <div class="w-12 h-12 bg-gradient-to-br from-primary-600 to-cyan-500 rounded-xl flex items-center justify-center">
+                    <i class="fas fa-briefcase text-white text-xl"></i>
+                </div>
+                <span class="text-2xl font-bold text-gray-900">Job<span class="text-primary-600">Board</span></span>
+            </a>
+            <h2 class="mt-6 text-3xl font-bold text-gray-900">Create an Account</h2>
+            <p class="mt-2 text-gray-500">Join JobBoard and discover opportunities</p>
+        </div>
+
+        <!-- Register Card -->
+        <div class="bg-white rounded-2xl shadow-xl border border-gray-100 p-8">
+            <!-- Role Selection -->
+            <div class="grid grid-cols-2 gap-3 mb-6">
+                <label class="cursor-pointer">
+                    <input type="radio" name="roles" value="APPLICANT" checked class="peer hidden" onchange="toggleRoleFields()">
+                    <div class="p-4 rounded-xl border-2 border-gray-200 peer-checked:border-primary-500 peer-checked:bg-primary-50 text-center transition-all">
+                        <i class="fas fa-user-tie text-2xl text-primary-600 mb-2"></i>
+                        <p class="font-medium text-gray-900">Job Seeker</p>
+                        <p class="text-xs text-gray-500 mt-1">Apply for job listings</p>
+                    </div>
+                </label>
+                <label class="cursor-pointer">
+                    <input type="radio" name="roles" value="EMPLOYER" class="peer hidden" onchange="toggleRoleFields()">
+                    <div class="p-4 rounded-xl border-2 border-gray-200 peer-checked:border-primary-500 peer-checked:bg-primary-50 text-center transition-all">
+                        <i class="fas fa-building text-2xl text-primary-600 mb-2"></i>
+                        <p class="font-medium text-gray-900">Employer</p>
+                        <p class="text-xs text-gray-500 mt-1">Post job listings</p>
+                    </div>
+                </label>
+            </div>
+
+            <form id="register-form" onsubmit="handleRegister(event)">
+                <div class="mb-5">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+                    <input type="text" id="full-name" required placeholder="Full Name" 
+                        class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all">
+                </div>
+                <div class="grid grid-cols-2 gap-4 mb-5">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Country</label>
+                        <select id="country-select" onchange="onCountryChange()" 
+                            class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all bg-white">
+                            <option value="TR" data-code="+90">Turkey</option>
+                            <option value="US" data-code="+1">United States</option>
+                            <option value="DE" data-code="+49">Germany</option>
+                            <option value="GB" data-code="+44">United Kingdom</option>
+                            <option value="FR" data-code="+33">France</option>
+                            <option value="NL" data-code="+31">Netherlands</option>
+                            <option value="CA" data-code="+1">Canada</option>
+                            <option value="AU" data-code="+61">Australia</option>
+                            <option value="AE" data-code="+971">UAE</option>
+                            <option value="SA" data-code="+966">Saudi Arabia</option>
+                            <option value="EG" data-code="+20">Egypt</option>
+                            <option value="IN" data-code="+91">India</option>
+                            <option value="PK" data-code="+92">Pakistan</option>
+                            <option value="BR" data-code="+55">Brazil</option>
+                            <option value="MX" data-code="+52">Mexico</option>
+                            <option value="JP" data-code="+81">Japan</option>
+                            <option value="KR" data-code="+82">South Korea</option>
+                            <option value="CN" data-code="+86">China</option>
+                            <option value="RU" data-code="+7">Russia</option>
+                            <option value="ZA" data-code="+27">South Africa</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Phone Code</label>
+                        <input type="text" id="phone-code" value="+90" placeholder="+90" oninput="onPhoneCodeInput()"
+                            class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all">
+                    </div>
+                </div>
+                <div class="mb-5">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
+                    <input type="tel" id="phone-number" placeholder="5XX XXX XX XX" 
+                        class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all">
+                </div>
+                <div class="mb-5">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+                    <div class="relative">
+                        <i class="fas fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                        <input type="email" id="email" required placeholder="example@email.com" 
+                            class="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all">
+                    </div>
+                </div>
+
+                <div class="mb-5">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                    <div class="relative">
+                        <i class="fas fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                        <input type="password" id="password" required placeholder="At least 8 characters" 
+                            class="w-full pl-12 pr-12 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all">
+                        <button type="button" onclick="togglePassword('password')" class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Employer fields -->
+                <div id="employer-fields" class="hidden">
+                    <div class="mb-5">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Company Name</label>
+                        <input type="text" id="company-name" placeholder="Company Name" 
+                            class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all">
+                    </div>
+                    <div class="mb-5">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Website</label>
+                        <input type="url" id="website" placeholder="https://company.com" 
+                            class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all">
+                    </div>
+                </div>
+
+                <label class="flex items-start mb-6 cursor-pointer">
+                    <input type="checkbox" id="terms" required class="w-4 h-4 mt-0.5 text-primary-600 rounded border-gray-300 focus:ring-primary-500">
+                    <span class="ml-2 text-sm text-gray-600">
+                        I accept the <a href="/terms-of-use" target="_blank" class="text-primary-600 hover:underline">Terms of Use</a> and 
+                        <a href="/privacy-policy" target="_blank" class="text-primary-600 hover:underline">Privacy Policy</a>.
+                    </span>
+                </label>
+
+                <button type="submit" id="register-btn" class="w-full btn-primary py-3.5 text-white font-semibold rounded-xl">
+                    Register
+                </button>
+            </form>
+
+            <!-- Social logins removed -->
+        </div>
+
+        <p class="mt-8 text-center text-gray-500">
+            Already have an account? 
+            <a href="/login" class="text-primary-600 font-semibold hover:text-primary-700">Log in</a>
+        </p>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function togglePassword(id) {
+        const input = document.getElementById(id);
+        input.type = input.type === 'password' ? 'text' : 'password';
+    }
+
+    function toggleRoleFields() {
+        const isEmployer = Array.from(document.querySelectorAll('input[name="roles"]'))
+            .some(input => input.value === 'EMPLOYER' && input.checked);
+        document.getElementById('employer-fields').classList.toggle('hidden', !isEmployer);
+    }
+
+    function getSelectedRole() {
+        const checked = document.querySelector('input[name="roles"]:checked');
+        return checked ? checked.value : 'APPLICANT';
+    }
+
+    let phoneCodeManuallyChanged = false;
+
+    function onCountryChange() {
+        if (!phoneCodeManuallyChanged) {
+            const select = document.getElementById('country-select');
+            const code = select.options[select.selectedIndex].getAttribute('data-code');
+            document.getElementById('phone-code').value = code;
+        }
+    }
+
+    function onPhoneCodeInput() {
+        phoneCodeManuallyChanged = true;
+    }
+
+    function getFullPhone() {
+        const code = document.getElementById('phone-code').value.trim();
+        const number = document.getElementById('phone-number').value.trim().replace(/\s+/g, '');
+        if (!number) return '';
+        const normalizedCode = code.startsWith('+') ? code : '+' + code;
+        return normalizedCode + number;
+    }
+
+    function validatePhone() {
+        const fullPhone = getFullPhone();
+        if (!fullPhone) return true; // phone is optional
+        // Basic E.164-like validation: starts with + followed by 7-15 digits total
+        const digitsOnly = fullPhone.replace(/\D/g, '');
+        if (digitsOnly.length < 7 || digitsOnly.length > 15) {
+            showToast('Invalid Phone', 'Please enter a valid phone number with country code.', 'error');
+            return false;
+        }
+        return true;
+    }
+
+    async function handleRegister(e) {
+        e.preventDefault();
+
+        const termsChecked = document.getElementById('terms').checked;
+        if (!termsChecked) {
+            showToast('Terms Required', 'You must accept the Terms of Use and Privacy Policy to register.', 'error');
+            return;
+        }
+
+        if (!validatePhone()) {
+            return;
+        }
+
+        const btn = document.getElementById('register-btn');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Registering...';
+
+        try {
+            const role = getSelectedRole();
+            const roles = [role];
+            const payload = {
+                email: document.getElementById('email').value,
+                password: document.getElementById('password').value,
+                full_name: document.getElementById('full-name').value,
+                phone: getFullPhone(),
+                avatar_url: null,
+                roles: roles
+            };
+
+            const data = await api('/users', {
+                method: 'POST',
+                body: JSON.stringify(payload)
+            });
+
+            const created = data.data;
+            const user = created.user || created;
+            if (created.access_token) {
+                localStorage.setItem('token', created.access_token);
+            }
+
+            // If employer, create employer profile
+            if (role === 'EMPLOYER') {
+                try {
+                    await api(`/employer-profile/${user.id}`, {
+                        method: 'PUT',
+                        body: JSON.stringify({
+                            display_name: document.getElementById('full-name').value,
+                            company_name: document.getElementById('company-name').value || null,
+                            website_url: document.getElementById('website').value || null,
+                            bio: null
+                        })
+                    });
+                } catch (e) {
+                    console.error('Employer profile error:', e);
+                }
+            }
+
+            saveUserToStorage(user);
+            showToast('Registration Successful', 'Your account has been created! Welcome.');
+            setTimeout(() => window.location.href = '/', 1500);
+        } catch (err) {
+            showToast('Registration Failed', err.message, 'error');
+            btn.disabled = false;
+            btn.innerHTML = 'Register';
+        }
+    }
+</script>
+{% endblock %}

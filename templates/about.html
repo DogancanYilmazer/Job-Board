@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+
+{% block title %}About - JobBoard{% endblock %}
+
+{% block content %}
+<!-- Hero -->
+<div class="bg-gradient-to-r from-primary-600 to-cyan-500 text-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
+        <h1 class="text-4xl md:text-5xl font-bold mb-6">About Us</h1>
+        <p class="text-lg md:text-xl text-blue-100 max-w-2xl mx-auto">
+            JobBoard is a modern job marketplace that brings job seekers and employers together.
+        </p>
+    </div>
+</div>
+
+<!-- Mission -->
+<section class="py-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+            <div>
+                <h2 class="text-3xl font-bold text-gray-900 mb-6">Our Mission</h2>
+                <p class="text-gray-600 leading-relaxed mb-4">
+                    Our mission at JobBoard is to build the most effective bridge between job seekers and employers.
+                    With a technology-first, people-centered approach, we create an ecosystem where everyone can
+                    unlock their full potential.
+                </p>
+                <p class="text-gray-600 leading-relaxed">
+                    Our AI-powered matching system aligns a candidate's skills and experience with employer needs
+                    as accurately as possible. That means both candidates and companies save time and make better matches.
+                </p>
+            </div>
+            <div class="relative">
+                <div class="bg-gradient-to-br from-primary-100 to-cyan-100 rounded-3xl p-8">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-white rounded-2xl p-6 shadow-sm text-center">
+                            <div class="text-3xl font-bold text-primary-600 mb-1">10K+</div>
+                            <div class="text-sm text-gray-500">Active Listings</div>
+                        </div>
+                        <div class="bg-white rounded-2xl p-6 shadow-sm text-center">
+                            <div class="text-3xl font-bold text-primary-600 mb-1">50K+</div>
+                            <div class="text-sm text-gray-500">Users</div>
+                        </div>
+                        <div class="bg-white rounded-2xl p-6 shadow-sm text-center">
+                            <div class="text-3xl font-bold text-primary-600 mb-1">1K+</div>
+                            <div class="text-sm text-gray-500">Companies</div>
+                        </div>
+                        <div class="bg-white rounded-2xl p-6 shadow-sm text-center">
+                            <div class="text-3xl font-bold text-primary-600 mb-1">5K+</div>
+                            <div class="text-sm text-gray-500">Matches</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Values -->
+<section class="py-20 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-16">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4">Our Values</h2>
+            <p class="text-gray-500 max-w-2xl mx-auto">The core values that guide every decision we make.</p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div class="text-center">
+                <div class="w-16 h-16 bg-primary-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-heart text-2xl text-primary-600"></i>
+                </div>
+                <h3 class="font-bold text-gray-900 mb-2">People-Centered</h3>
+                <p class="text-gray-500 text-sm">We always put people and their potential first.</p>
+            </div>
+            <div class="text-center">
+                <div class="w-16 h-16 bg-green-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-shield-alt text-2xl text-green-600"></i>
+                </div>
+                <h3 class="font-bold text-gray-900 mb-2">Reliable</h3>
+                <p class="text-gray-500 text-sm">Transparency and reliability are essential to us.</p>
+            </div>
+            <div class="text-center">
+                <div class="w-16 h-16 bg-purple-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-lightbulb text-2xl text-purple-600"></i>
+                </div>
+                <h3 class="font-bold text-gray-900 mb-2">Innovative</h3>
+                <p class="text-gray-500 text-sm">We follow and implement continuously evolving technology.</p>
+            </div>
+            <div class="text-center">
+                <div class="w-16 h-16 bg-orange-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-hands-helping text-2xl text-orange-600"></i>
+                </div>
+                <h3 class="font-bold text-gray-900 mb-2">Collaborative</h3>
+                <p class="text-gray-500 text-sm">We value working together to achieve success.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Team -->
+<section class="py-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-16">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4">Our Team</h2>
+            <p class="text-gray-500 max-w-2xl mx-auto">The passionate team behind JobBoard.</p>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 text-center card-hover">
+                <img src="https://ui-avatars.com/api/?name=John+Doe&background=2563eb&color=fff&size=128" alt="Team" class="w-24 h-24 rounded-full mx-auto mb-4 object-cover">
+                <h3 class="font-bold text-gray-900">John Doe</h3>
+                <p class="text-primary-600 text-sm mb-2">Founder & CEO</p>
+                <p class="text-gray-500 text-sm">10+ years of experience in technology and human resources.</p>
+            </div>
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 text-center card-hover">
+                <img src="https://ui-avatars.com/api/?name=Jane+Smith&background=0891b2&color=fff&size=128" alt="Team" class="w-24 h-24 rounded-full mx-auto mb-4 object-cover">
+                <h3 class="font-bold text-gray-900">Jane Smith</h3>
+                <p class="text-primary-600 text-sm mb-2">CTO</p>
+                <p class="text-gray-500 text-sm">Expert in artificial intelligence and large-scale systems.</p>
+            </div>
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 text-center card-hover">
+                <img src="https://ui-avatars.com/api/?name=Michael+Brown&background=7c3aed&color=fff&size=128" alt="Team" class="w-24 h-24 rounded-full mx-auto mb-4 object-cover">
+                <h3 class="font-bold text-gray-900">Michael Brown</h3>
+                <p class="text-primary-600 text-sm mb-2">Product Manager</p>
+                <p class="text-gray-500 text-sm">Leader in user experience and product strategy.</p>
+            </div>
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 text-center card-hover">
+                <img src="https://ui-avatars.com/api/?name=Emily+Davis&background=db2777&color=fff&size=128" alt="Team" class="w-24 h-24 rounded-full mx-auto mb-4 object-cover">
+                <h3 class="font-bold text-gray-900">Emily Davis</h3>
+                <p class="text-primary-600 text-sm mb-2">Marketing Manager</p>
+                <p class="text-gray-500 text-sm">Expert in digital marketing and brand strategy.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Contact -->
+<section class="py-20 bg-white">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4">Contact</h2>
+            <p class="text-gray-500">Get in touch with us, and we will be happy to help.</p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+            <div class="bg-gray-50 rounded-2xl p-6 text-center">
+                <div class="w-12 h-12 bg-primary-100 rounded-xl flex items-center justify-center mx-auto mb-3">
+                    <i class="fas fa-envelope text-primary-600"></i>
+                </div>
+                <p class="font-medium text-gray-900">Email</p>
+                <p class="text-gray-500 text-sm mt-1">info@jobboard.com</p>
+            </div>
+            <div class="bg-gray-50 rounded-2xl p-6 text-center">
+                <div class="w-12 h-12 bg-primary-100 rounded-xl flex items-center justify-center mx-auto mb-3">
+                    <i class="fas fa-phone text-primary-600"></i>
+                </div>
+                <p class="font-medium text-gray-900">Phone</p>
+                <p class="text-gray-500 text-sm mt-1">+90 212 123 45 67</p>
+            </div>
+            <div class="bg-gray-50 rounded-2xl p-6 text-center">
+                <div class="w-12 h-12 bg-primary-100 rounded-xl flex items-center justify-center mx-auto mb-3">
+                    <i class="fas fa-map-marker-alt text-primary-600"></i>
+                </div>
+                <p class="font-medium text-gray-900">Address</p>
+                <p class="text-gray-500 text-sm mt-1">Istanbul, Turkey</p>
+            </div>
+        </div>
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+            <form onsubmit="event.preventDefault(); showToast('Sent', 'Your message has been received. We will get back to you as soon as possible.');">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+                        <input type="text" required class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                        <input type="email" required class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all">
+                    </div>
+                </div>
+                <div class="mb-5">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Subject</label>
+                    <input type="text" required class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all">
+                </div>
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Message</label>
+                    <textarea rows="5" required class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all resize-none"></textarea>
+                </div>
+                <button type="submit" class="btn-primary px-8 py-3 text-white font-semibold rounded-xl">
+                    <i class="fas fa-paper-plane mr-2"></i> Send
+                </button>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}

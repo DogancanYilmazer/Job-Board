@@ -1,0 +1,642 @@
+{% extends "base.html" %}
+
+{% block title %}My Applications - JobBoard{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="bg-white border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <h1 id="applications-title" class="text-3xl font-bold text-gray-900">My Applications</h1>
+        <p id="applications-subtitle" class="text-gray-500 mt-2">Track all of your job applications in one place</p>
+    </div>
+</div>
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Stats Cards -->
+    <div id="stats-container" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 text-center">
+            <div class="w-12 h-12 bg-primary-100 rounded-xl flex items-center justify-center mx-auto mb-3">
+                <i id="stat-icon-total" class="fas fa-paper-plane text-primary-600"></i>
+            </div>
+            <p class="text-2xl font-bold text-gray-900" id="stat-total">0</p>
+            <p class="text-sm text-gray-500" id="stat-label-total">Total</p>
+        </div>
+        <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 text-center">
+            <div class="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center mx-auto mb-3">
+                <i id="stat-icon-second" class="fas fa-clock text-yellow-600"></i>
+            </div>
+            <p class="text-2xl font-bold text-gray-900" id="stat-pending">0</p>
+            <p class="text-sm text-gray-500" id="stat-label-pending">Pending</p>
+        </div>
+        <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 text-center">
+            <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mx-auto mb-3">
+                <i id="stat-icon-third" class="fas fa-comments text-purple-600"></i>
+            </div>
+            <p class="text-2xl font-bold text-gray-900" id="stat-interview">0</p>
+            <p class="text-sm text-gray-500" id="stat-label-interview">Interview</p>
+        </div>
+        <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 text-center">
+            <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mx-auto mb-3">
+                <i id="stat-icon-fourth" class="fas fa-check-circle text-green-600"></i>
+            </div>
+            <p class="text-2xl font-bold text-gray-900" id="stat-accepted">0</p>
+            <p class="text-sm text-gray-500" id="stat-label-accepted">Accepted</p>
+        </div>
+    </div>
+
+    <!-- View Toggle (only for employers) -->
+    <div id="view-toggle" class="hidden mb-6">
+        <div class="inline-flex bg-gray-100 p-1 rounded-xl">
+            <button id="view-sent" onclick="setView('sent')" class="px-4 py-2 rounded-lg text-sm font-medium transition">
+                <i class="fas fa-briefcase mr-2"></i>My Jobs
+            </button>
+            <button id="view-received" onclick="setView('received')" class="px-4 py-2 rounded-lg text-sm font-medium transition">
+                <i class="fas fa-users mr-2"></i>Applicants
+            </button>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-6">
+        <div class="flex flex-col sm:flex-row gap-4">
+            <div class="flex-1 relative">
+                <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                <input type="text" id="search-apps" placeholder="Search listings..." 
+                    class="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all">
+            </div>
+            <select id="filter-status" 
+                class="px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all sm:w-48">
+                <option value="">All statuses</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Applications List -->
+    <div id="applications-list" class="space-y-4">
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+            <div class="flex items-start gap-4">
+                <div class="skeleton w-14 h-14 rounded-xl flex-shrink-0"></div>
+                <div class="flex-1">
+                    <div class="skeleton h-5 w-1/3 rounded mb-2"></div>
+                    <div class="skeleton h-4 w-1/4 rounded mb-3"></div>
+                    <div class="skeleton h-4 w-full rounded"></div>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+            <div class="flex items-start gap-4">
+                <div class="skeleton w-14 h-14 rounded-xl flex-shrink-0"></div>
+                <div class="flex-1">
+                    <div class="skeleton h-5 w-1/3 rounded mb-2"></div>
+                    <div class="skeleton h-4 w-1/4 rounded mb-3"></div>
+                    <div class="skeleton h-4 w-full rounded"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    <div id="pagination" class="flex justify-center mt-8 gap-2"></div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let currentPage = 1;
+    const limit = 10;
+    let searchDebounce = null;
+    let currentView = 'sent';
+    let currentUser = null;
+
+    const APP_STATUS_CONFIG = {
+        'APPLIED': { label: 'Applied', icon: 'fa-paper-plane', color: 'bg-blue-100 text-blue-700', border: 'border-blue-200' },
+        'REVIEWED': { label: 'Reviewed', icon: 'fa-eye', color: 'bg-yellow-100 text-yellow-700', border: 'border-yellow-200' },
+        'INTERVIEW': { label: 'Interview', icon: 'fa-comments', color: 'bg-purple-100 text-purple-700', border: 'border-purple-200' },
+        'OFFER': { label: 'Offer', icon: 'fa-handshake', color: 'bg-orange-100 text-orange-700', border: 'border-orange-200' },
+        'ACCEPTED': { label: 'Accepted', icon: 'fa-check-circle', color: 'bg-green-100 text-green-700', border: 'border-green-200' },
+        'REJECTED': { label: 'Rejected', icon: 'fa-times-circle', color: 'bg-red-100 text-red-700', border: 'border-red-200' },
+        'WITHDRAWN': { label: 'Withdrawn', icon: 'fa-undo', color: 'bg-gray-100 text-gray-700', border: 'border-gray-200' }
+    };
+
+    const JOB_STATUS_CONFIG = {
+        'DRAFT': { label: 'Draft', icon: 'fa-pencil-alt', color: 'bg-gray-100 text-gray-700', border: 'border-gray-200' },
+        'PENDING_REVIEW': { label: 'Pending Review', icon: 'fa-hourglass-half', color: 'bg-yellow-100 text-yellow-700', border: 'border-yellow-200' },
+        'OPEN': { label: 'Open', icon: 'fa-door-open', color: 'bg-green-100 text-green-700', border: 'border-green-200' },
+        'NEGOTIATING': { label: 'Negotiating', icon: 'fa-handshake', color: 'bg-blue-100 text-blue-700', border: 'border-blue-200' },
+        'IN_PROGRESS': { label: 'In Progress', icon: 'fa-spinner', color: 'bg-purple-100 text-purple-700', border: 'border-purple-200' },
+        'FILLED': { label: 'Filled', icon: 'fa-check-circle', color: 'bg-emerald-100 text-emerald-700', border: 'border-emerald-200' },
+        'COMPLETED': { label: 'Completed', icon: 'fa-flag-checkered', color: 'bg-teal-100 text-teal-700', border: 'border-teal-200' },
+        'HIDDEN': { label: 'Hidden', icon: 'fa-eye-slash', color: 'bg-gray-100 text-gray-700', border: 'border-gray-200' },
+        'CANCELLED': { label: 'Cancelled', icon: 'fa-ban', color: 'bg-red-100 text-red-700', border: 'border-red-200' },
+        'EXPIRED': { label: 'Expired', icon: 'fa-clock', color: 'bg-orange-100 text-orange-700', border: 'border-orange-200' }
+    };
+
+    const APP_STATUSES = ['APPLIED','REVIEWED','INTERVIEW','OFFER','ACCEPTED','REJECTED','WITHDRAWN'];
+    const JOB_STATUSES = ['DRAFT','PENDING_REVIEW','OPEN','NEGOTIATING','IN_PROGRESS','FILLED','COMPLETED','HIDDEN','CANCELLED','EXPIRED'];
+
+    const APPLICANT_SENT_COPY = {
+        title: 'My Applications',
+        subtitle: 'Track all of your job applications in one place',
+        searchPlaceholder: 'Search listings...',
+        emptyTitle: 'No applications found',
+        emptyText: 'You have not submitted any job applications yet.',
+        emptyActionLabel: 'Browse Job Listings',
+        emptyActionHref: '/jobs'
+    };
+
+    const EMPLOYER_SENT_COPY = {
+        title: 'My Job Listings',
+        subtitle: 'Manage all the jobs you have posted',
+        searchPlaceholder: 'Search your jobs...',
+        emptyTitle: 'No jobs posted yet',
+        emptyText: 'You have not posted any job listings yet.',
+        emptyActionLabel: 'Post a Job',
+        emptyActionHref: '/post-job'
+    };
+
+    const EMPLOYER_RECEIVED_COPY = {
+        title: 'Applications Received',
+        subtitle: 'Review applications submitted to your job listings',
+        searchPlaceholder: 'Search jobs or applicants...',
+        emptyTitle: 'No applications received',
+        emptyText: 'No one has applied to your jobs yet.',
+        emptyActionLabel: 'Post a Job',
+        emptyActionHref: '/post-job'
+    };
+
+    function isEmployer(user) {
+        return user && Array.isArray(user.roles) && user.roles.includes('EMPLOYER');
+    }
+
+    function isApplicant(user) {
+        return user && Array.isArray(user.roles) && user.roles.includes('APPLICANT');
+    }
+
+    function getViewCopy() {
+        if (isEmployer(currentUser)) {
+            return currentView === 'received' ? EMPLOYER_RECEIVED_COPY : EMPLOYER_SENT_COPY;
+        }
+        return APPLICANT_SENT_COPY;
+    }
+
+    function isJobsView() {
+        // Employer on Sent shows their jobs; everyone else on Sent shows applications
+        return isEmployer(currentUser) && currentView === 'sent';
+    }
+
+    function updateStatusFilterOptions() {
+        const select = document.getElementById('filter-status');
+        select.innerHTML = '<option value=\"\">All statuses</option>';
+        const statuses = isJobsView() ? JOB_STATUSES : APP_STATUSES;
+        statuses.forEach(s => {
+            const cfg = isJobsView() ? JOB_STATUS_CONFIG[s] : APP_STATUS_CONFIG[s];
+            const label = cfg ? cfg.label : s;
+            select.innerHTML += `<option value=\"${s}\">${label}</option>`;
+        });
+    }
+
+    function updateStatsHeader() {
+        if (isJobsView()) {
+            document.getElementById('stat-icon-total').className = 'fas fa-briefcase text-primary-600';
+            document.getElementById('stat-label-total').textContent = 'Total Jobs';
+
+            document.getElementById('stat-icon-second').className = 'fas fa-door-open text-green-600';
+            document.getElementById('stat-label-pending').textContent = 'Open';
+
+            document.getElementById('stat-icon-third').className = 'fas fa-pencil-alt text-gray-600';
+            document.getElementById('stat-label-interview').textContent = 'Drafts';
+
+            document.getElementById('stat-icon-fourth').className = 'fas fa-check-circle text-emerald-600';
+            document.getElementById('stat-label-accepted').textContent = 'Filled';
+        } else {
+            document.getElementById('stat-icon-total').className = 'fas fa-paper-plane text-primary-600';
+            document.getElementById('stat-label-total').textContent = 'Total';
+
+            document.getElementById('stat-icon-second').className = 'fas fa-clock text-yellow-600';
+            document.getElementById('stat-label-pending').textContent = 'Pending';
+
+            document.getElementById('stat-icon-third').className = 'fas fa-comments text-purple-600';
+            document.getElementById('stat-label-interview').textContent = 'Interview';
+
+            document.getElementById('stat-icon-fourth').className = 'fas fa-check-circle text-green-600';
+            document.getElementById('stat-label-accepted').textContent = 'Accepted';
+        }
+    }
+
+    function updateViewToggle() {
+        const toggle = document.getElementById('view-toggle');
+        if (!toggle) return;
+        if (isEmployer(currentUser)) {
+            toggle.classList.remove('hidden');
+        } else {
+            toggle.classList.add('hidden');
+        }
+
+        const sentBtn = document.getElementById('view-sent');
+        const receivedBtn = document.getElementById('view-received');
+        if (currentView === 'sent') {
+            sentBtn.classList.add('bg-white', 'text-primary-700', 'shadow-sm');
+            sentBtn.classList.remove('text-gray-600');
+            receivedBtn.classList.remove('bg-white', 'text-primary-700', 'shadow-sm');
+            receivedBtn.classList.add('text-gray-600');
+        } else {
+            receivedBtn.classList.add('bg-white', 'text-primary-700', 'shadow-sm');
+            receivedBtn.classList.remove('text-gray-600');
+            sentBtn.classList.remove('bg-white', 'text-primary-700', 'shadow-sm');
+            sentBtn.classList.add('text-gray-600');
+        }
+    }
+
+    function updateHeaderCopy() {
+        const copy = getViewCopy();
+        document.getElementById('applications-title').textContent = copy.title;
+        document.getElementById('applications-subtitle').textContent = copy.subtitle;
+        document.getElementById('search-apps').placeholder = copy.searchPlaceholder;
+    }
+
+    function setView(view) {
+        if (currentView === view) return;
+        currentView = view;
+        currentPage = 1;
+        updateViewToggle();
+        updateHeaderCopy();
+        updateStatsHeader();
+        updateStatusFilterOptions();
+        loadApplications();
+    }
+
+    async function loadApplications() {
+        const user = await getSessionUser();
+        if (!user) {
+            window.location.href = '/login';
+            return;
+        }
+        currentUser = user;
+
+        updateViewToggle();
+        updateHeaderCopy();
+        updateStatsHeader();
+        updateStatusFilterOptions();
+
+        const container = document.getElementById('applications-list');
+        const status = document.getElementById('filter-status').value;
+        const search = document.getElementById('search-apps').value.trim();
+
+        try {
+            const params = new URLSearchParams({
+                limit: String(limit),
+                page: String(currentPage)
+            });
+            if (status) params.set('status', status);
+            if (search) params.set('q', search);
+
+            let url, data;
+            if (isJobsView()) {
+                url = `/users/${encodeURIComponent(user.id)}/jobs?${params.toString()}`;
+            } else if (currentView === 'received') {
+                url = `/users/${encodeURIComponent(user.id)}/job-applications?${params.toString()}`;
+            } else {
+                url = `/users/${encodeURIComponent(user.id)}/applications?${params.toString()}`;
+            }
+            data = await api(url);
+            let items = data.data || [];
+            const meta = data.meta || { total: 0 };
+            const totalPages = Math.ceil(Number(meta.total || 0) / limit);
+
+            if (totalPages > 0 && currentPage > totalPages) {
+                currentPage = totalPages;
+                return loadApplications();
+            }
+
+            updateStats(meta);
+
+            if (items.length === 0) {
+                const hasFilters = Boolean(status || search);
+                const copy = getViewCopy();
+                container.innerHTML = `
+                    <div class="text-center py-16 bg-white rounded-2xl border border-gray-100">
+                        <div class="w-20 h-20 mx-auto bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                            <i class="fas fa-inbox text-3xl text-gray-400"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">${hasFilters ? 'No matching items' : copy.emptyTitle}</h3>
+                        <p class="text-gray-500 mb-6">${hasFilters ? 'Try changing the search or status filter.' : copy.emptyText}</p>
+                        ${hasFilters ? `
+                            <button onclick="clearApplicationFilters()" class="px-6 py-3 border border-gray-200 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition">
+                                Clear Filters
+                            </button>
+                        ` : `
+                            <a href="${copy.emptyActionHref}" class="btn-primary inline-block px-6 py-3 text-white font-medium rounded-xl">
+                                ${copy.emptyActionLabel}
+                            </a>
+                        `}
+                    </div>
+                `;
+                document.getElementById('pagination').innerHTML = '';
+                return;
+            }
+
+            if (isJobsView()) {
+                container.innerHTML = items.map(renderJobCard).join('');
+            } else if (currentView === 'received') {
+                container.innerHTML = items.map(renderReceivedCard).join('');
+            } else {
+                container.innerHTML = items.map(renderSentCard).join('');
+            }
+
+            renderPagination(totalPages, currentPage);
+        } catch (err) {
+            container.innerHTML = `
+                <div class="text-center py-16 bg-white rounded-2xl border border-gray-100">
+                    <div class="w-20 h-20 mx-auto bg-red-100 rounded-full flex items-center justify-center mb-4">
+                        <i class="fas fa-exclamation-triangle text-3xl text-red-500"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">An error occurred</h3>
+                    <p class="text-gray-500">${escapeHtml(err.message)}</p>
+                </div>
+            `;
+        }
+    }
+
+    async function getSessionUser() {
+        let { user } = getAuthFromStorage();
+        if (!user) return null;
+
+        if (!Array.isArray(user.roles)) {
+            try {
+                const response = await api(`/users/${encodeURIComponent(user.id)}`);
+                if (response.data && typeof response.data === 'object' && response.data.id) {
+                    user = response.data;
+                    saveUserToStorage(user);
+                }
+            } catch (err) {
+                // Keep existing user object if API fails
+            }
+        }
+        return user;
+    }
+
+    function renderSentCard(app) {
+        const cfg = APP_STATUS_CONFIG[app.status] || APP_STATUS_CONFIG['APPLIED'];
+        const jobTitle = escapeHtml(app.job_title || 'Listing');
+        const coverLetter = escapeHtml(app.cover_letter || '');
+        const jobUrl = app.job_id ? `/jobs/${encodeURIComponent(app.job_id)}` : '/jobs';
+        const hasMatchScore = app.match_score !== null && app.match_score !== undefined;
+        const matchScore = Math.max(0, Math.min(100, Number(app.match_score) || 0));
+        const initial = escapeHtml((app.job_title || 'J').charAt(0).toUpperCase());
+
+        return `
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 card-hover animate-fade-in">
+                <div class="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                    <div class="flex items-start gap-4 min-w-0">
+                        <div class="w-14 h-14 bg-gradient-to-br from-primary-100 to-cyan-100 rounded-xl flex items-center justify-center text-primary-600 font-bold text-xl flex-shrink-0">
+                            ${initial}
+                        </div>
+                        <div class="min-w-0">
+                            <a href="${jobUrl}" class="font-semibold text-gray-900 text-lg hover:text-primary-600 transition">${jobTitle}</a>
+                            <p class="text-sm text-gray-500 mt-1">
+                                <i class="far fa-calendar mr-1"></i> ${timeAgo(app.submitted_at || app.created_at)}
+                            </p>
+                            ${hasMatchScore ? `
+                                <div class="flex items-center gap-2 mt-2">
+                                    <div class="w-24 h-2 bg-gray-100 rounded-full overflow-hidden">
+                                        <div class="h-full bg-primary-500 rounded-full" style="width: ${matchScore}%"></div>
+                                    </div>
+                                    <span class="text-xs text-gray-500">${matchScore}% match</span>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-3">
+                        <span class="px-4 py-2 rounded-xl text-sm font-medium ${cfg.color} border ${cfg.border} flex items-center gap-2">
+                            <i class="fas ${cfg.icon}"></i> ${cfg.label}
+                        </span>
+                        ${renderWithdrawControl(app)}
+                    </div>
+                </div>
+                ${app.cover_letter ? `
+                    <div class="mt-4 pt-4 border-t border-gray-100">
+                        <p class="text-sm text-gray-600 line-clamp-2">${coverLetter}</p>
+                    </div>
+                ` : ''}
+            </div>
+        `;
+    }
+
+    function renderReceivedCard(app) {
+        const cfg = APP_STATUS_CONFIG[app.status] || APP_STATUS_CONFIG['APPLIED'];
+        const jobTitle = escapeHtml(app.job_title || 'Listing');
+        const applicantName = escapeHtml(app.applicant_name || 'Applicant');
+        const coverLetter = escapeHtml(app.cover_letter || '');
+        const jobUrl = app.job_id ? `/jobs/${encodeURIComponent(app.job_id)}` : '/jobs';
+        const appUrl = app.id ? `/applications/${encodeURIComponent(app.id)}` : '#';
+        const hasMatchScore = app.match_score !== null && app.match_score !== undefined;
+        const matchScore = Math.max(0, Math.min(100, Number(app.match_score) || 0));
+        const initial = escapeHtml((app.applicant_name || 'A').charAt(0).toUpperCase());
+
+        return `
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 card-hover animate-fade-in">
+                <div class="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                    <div class="flex items-start gap-4 min-w-0">
+                        <div class="w-14 h-14 bg-gradient-to-br from-emerald-100 to-teal-100 rounded-xl flex items-center justify-center text-emerald-600 font-bold text-xl flex-shrink-0">
+                            ${initial}
+                        </div>
+                        <div class="min-w-0">
+                            <p class="text-sm text-gray-500">
+                                <i class="fas fa-briefcase mr-1"></i> <a href="${jobUrl}" class="hover:text-primary-600 transition">${jobTitle}</a>
+                            </p>
+                            <p class="font-semibold text-gray-900 text-lg mt-0.5">${applicantName}</p>
+                            <p class="text-sm text-gray-500 mt-1">
+                                <i class="far fa-calendar mr-1"></i> ${timeAgo(app.submitted_at || app.created_at)}
+                            </p>
+                            ${hasMatchScore ? `
+                                <div class="flex items-center gap-2 mt-2">
+                                    <div class="w-24 h-2 bg-gray-100 rounded-full overflow-hidden">
+                                        <div class="h-full bg-primary-500 rounded-full" style="width: ${matchScore}%"></div>
+                                    </div>
+                                    <span class="text-xs text-gray-500">${matchScore}% match</span>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-3">
+                        <span class="px-4 py-2 rounded-xl text-sm font-medium ${cfg.color} border ${cfg.border} flex items-center gap-2">
+                            <i class="fas ${cfg.icon}"></i> ${cfg.label}
+                        </span>
+                        <a href="${appUrl}" class="px-3 py-2 rounded-xl border border-gray-200 text-gray-700 hover:bg-gray-50 transition text-sm font-medium">
+                            <i class="fas fa-eye mr-1"></i> View
+                        </a>
+                    </div>
+                </div>
+                ${app.cover_letter ? `
+                    <div class="mt-4 pt-4 border-t border-gray-100">
+                        <p class="text-sm text-gray-600 line-clamp-2">${coverLetter}</p>
+                    </div>
+                ` : ''}
+            </div>
+        `;
+    }
+
+    function renderJobCard(job) {
+        const cfg = JOB_STATUS_CONFIG[job.status] || JOB_STATUS_CONFIG['DRAFT'];
+        const title = escapeHtml(job.title || 'Untitled Job');
+        const description = escapeHtml(job.description || '');
+        const jobUrl = job.id ? `/jobs/${encodeURIComponent(job.id)}` : '/jobs';
+        const location = [job.city, job.country].filter(Boolean).join(', ') || 'Remote / Not specified';
+        const workplace = escapeHtml(job.workplace_type || '');
+        const jobType = escapeHtml(job.job_type || '');
+        const salary = job.salary || {};
+        const hasSalary = salary.min_minor !== null || salary.max_minor !== null;
+        const salaryText = hasSalary
+            ? `${Number(salary.min_minor || 0).toLocaleString()} - ${Number(salary.max_minor || 0).toLocaleString()} ${escapeHtml(salary.currency || '')}`
+            : 'Salary not specified';
+        const initial = escapeHtml((job.title || 'J').charAt(0).toUpperCase());
+        const appCount = Number(job.application_count || 0);
+
+        return `
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 card-hover animate-fade-in">
+                <div class="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                    <div class="flex items-start gap-4 min-w-0">
+                        <div class="w-14 h-14 bg-gradient-to-br from-primary-100 to-cyan-100 rounded-xl flex items-center justify-center text-primary-600 font-bold text-xl flex-shrink-0">
+                            ${initial}
+                        </div>
+                        <div class="min-w-0">
+                            <a href="${jobUrl}" class="font-semibold text-gray-900 text-lg hover:text-primary-600 transition">${title}</a>
+                            <p class="text-sm text-gray-500 mt-1">
+                                <i class="fas fa-map-marker-alt mr-1"></i> ${escapeHtml(location)}
+                                ${workplace ? `<span class="mx-2">\u2022</span> ${escapeHtml(workplace)}` : ''}
+                                ${jobType ? `<span class="mx-2">\u2022</span> ${escapeHtml(jobType)}` : ''}
+                            </p>
+                            <p class="text-sm text-gray-500 mt-1">
+                                <i class="fas fa-money-bill-wave mr-1"></i> ${salaryText}
+                            </p>
+                            <p class="text-sm text-gray-500 mt-1">
+                                <i class="far fa-calendar mr-1"></i> ${timeAgo(job.created_at)}
+                                ${appCount > 0 ? `<span class="mx-2">\u2022</span><i class="fas fa-users mr-1"></i> ${appCount} applicant${appCount === 1 ? '' : 's'}` : ''}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-3">
+                        <span class="px-4 py-2 rounded-xl text-sm font-medium ${cfg.color} border ${cfg.border} flex items-center gap-2">
+                            <i class="fas ${cfg.icon}"></i> ${cfg.label}
+                        </span>
+                        <a href="${jobUrl}" class="px-3 py-2 rounded-xl border border-gray-200 text-gray-700 hover:bg-gray-50 transition text-sm font-medium">
+                            <i class="fas fa-eye mr-1"></i> View
+                        </a>
+                        <a href="${jobUrl}" class="px-3 py-2 rounded-xl bg-primary-600 text-white hover:bg-primary-700 transition text-sm font-medium">
+                            <i class="fas fa-pencil-alt mr-1"></i> Edit
+                        </a>
+                    </div>
+                </div>
+                ${description ? `
+                    <div class="mt-4 pt-4 border-t border-gray-100">
+                        <p class="text-sm text-gray-600 line-clamp-2">${description}</p>
+                    </div>
+                ` : ''}
+            </div>
+        `;
+    }
+
+    function renderWithdrawControl(app) {
+        if (!['APPLIED', 'REVIEWED'].includes(app.status)) return '';
+        const appId = escapeHtml(app.id || '');
+        return `
+            <button onclick="withdrawApp('${appId}')" class="p-2 text-gray-400 hover:text-red-500 transition" title="Withdraw">
+                <i class="fas fa-undo"></i>
+            </button>
+        `;
+    }
+
+    function updateStats(meta) {
+        const counts = meta.status_counts || {};
+        const count = status => Number(counts[status] || 0);
+        const total = Number(meta.total ?? Object.values(counts).reduce((sum, value) => sum + Number(value || 0), 0));
+
+        document.getElementById('stat-total').textContent = total;
+        if (isJobsView()) {
+            document.getElementById('stat-pending').textContent = count('OPEN') + count('NEGOTIATING');
+            document.getElementById('stat-interview').textContent = count('DRAFT');
+            document.getElementById('stat-accepted').textContent = count('FILLED') + count('COMPLETED');
+        } else {
+            document.getElementById('stat-pending').textContent = count('APPLIED') + count('REVIEWED');
+            document.getElementById('stat-interview').textContent = count('INTERVIEW');
+            document.getElementById('stat-accepted').textContent = count('ACCEPTED');
+        }
+    }
+
+    function escapeHtml(value) {
+        return String(value ?? '').replace(/[&<>"']/g, char => ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#039;'
+        }[char]));
+    }
+
+    function resetFilters() {
+        document.getElementById('search-apps').value = '';
+        document.getElementById('filter-status').value = '';
+    }
+
+    function clearApplicationFilters() {
+        resetFilters();
+        currentPage = 1;
+        loadApplications();
+    }
+
+    function resetAndLoadApplications() {
+        currentPage = 1;
+        loadApplications();
+    }
+
+    function renderPagination(totalPages, page) {
+        const container = document.getElementById('pagination');
+        if (totalPages <= 1) {
+            container.innerHTML = '';
+            return;
+        }
+        let html = '';
+        if (page > 1) html += `<button onclick="goToPage(${page - 1})" class="px-4 py-2 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 transition"><i class="fas fa-chevron-left"></i></button>`;
+        for (let i = 1; i <= totalPages; i++) {
+            if (i === page) html += `<button class="px-4 py-2 rounded-xl bg-primary-600 text-white font-medium">${i}</button>`;
+            else if (i === 1 || i === totalPages || (i >= page - 1 && i <= page + 1)) html += `<button onclick="goToPage(${i})" class="px-4 py-2 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 transition">${i}</button>`;
+            else if (i === page - 2 || i === page + 2) html += `<span class="px-2 text-gray-400">...</span>`;
+        }
+        if (page < totalPages) html += `<button onclick="goToPage(${page + 1})" class="px-4 py-2 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 transition"><i class="fas fa-chevron-right"></i></button>`;
+        container.innerHTML = html;
+    }
+
+    function goToPage(page) {
+        currentPage = page;
+        loadApplications();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    async function withdrawApp(appId) {
+        const { user } = getAuthFromStorage();
+        if (!user) return;
+        
+        if (!confirm('Are you sure you want to withdraw this application?')) return;
+        
+        try {
+            await api(`/applications/${encodeURIComponent(appId)}/withdraw`, {
+                method: 'POST',
+                body: JSON.stringify({ reason: 'Withdrawn by user' })
+            });
+            showToast('Success', 'Your application has been withdrawn.');
+            loadApplications();
+        } catch (err) {
+            showToast('Error', err.message, 'error');
+        }
+    }
+
+    document.getElementById('filter-status')?.addEventListener('change', resetAndLoadApplications);
+
+    document.getElementById('search-apps')?.addEventListener('input', () => {
+        clearTimeout(searchDebounce);
+        searchDebounce = setTimeout(resetAndLoadApplications, 250);
+    });
+
+    loadApplications();
+</script>
+{% endblock %}

@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+psycopg2-binary
+pymongo
+jinja2
+python-multipart
+pyotp>=2.9.0
+qrcode[pil]>=7.4

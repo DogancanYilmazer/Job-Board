@@ -1,0 +1,280 @@
+{% extends "base.html" %}
+
+{% block title %}Post a Job - JobBoard{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="bg-gradient-to-r from-primary-600 to-cyan-500 text-white">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <h1 class="text-3xl md:text-4xl font-bold mb-3">Create a New Job Listing</h1>
+        <p class="text-blue-100 text-lg">Create a detailed listing to find the right candidate.</p>
+    </div>
+</div>
+
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 -mt-6">
+    <div class="bg-white rounded-2xl shadow-xl border border-gray-100 p-6 md:p-10">
+        <form id="job-form" onsubmit="handleSubmit(event)">
+            <!-- Basic Info -->
+            <div class="mb-8">
+                <h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
+                    <span class="w-8 h-8 bg-primary-100 text-primary-600 rounded-lg flex items-center justify-center text-sm font-bold mr-3">1</span>
+                    Basic Information
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Listing Title <span class="text-red-500">*</span></label>
+                        <input type="text" id="title" required placeholder="e.g. Senior Frontend Developer" 
+                            class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all">
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Description <span class="text-red-500">*</span></label>
+                        <textarea id="description" required rows="6" placeholder="Job description, responsibilities, and expectations..." 
+                            class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all resize-none"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Location -->
+            <div class="mb-8">
+                <h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
+                    <span class="w-8 h-8 bg-primary-100 text-primary-600 rounded-lg flex items-center justify-center text-sm font-bold mr-3">2</span>
+                    Location
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Country</label>
+                        <input type="text" id="country" placeholder="Turkey" 
+                            class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">City</label>
+                        <input type="text" id="city" placeholder="Istanbul" 
+                            class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Area</label>
+                        <input type="text" id="area" placeholder="Kadikoy" 
+                            class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all">
+                    </div>
+                    <div class="md:col-span-3">
+                        <label class="flex items-center cursor-pointer">
+                            <input type="checkbox" id="remote-allowed" class="w-5 h-5 text-primary-600 rounded border-gray-300 focus:ring-primary-500">
+                            <span class="ml-3 text-gray-700">Allow remote work</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Job Details -->
+            <div class="mb-8">
+                <h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
+                    <span class="w-8 h-8 bg-primary-100 text-primary-600 rounded-lg flex items-center justify-center text-sm font-bold mr-3">3</span>
+                    Job Details
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Workplace Type</label>
+                        <select id="workplace-type" 
+                            class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all">
+                            <option value="">Select</option>
+                            <option value="ONSITE">On-site</option>
+                            <option value="REMOTE">Remote</option>
+                            <option value="HYBRID">Hybrid</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Job Type</label>
+                        <select id="job-type" 
+                            class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all">
+                            <option value="">Select</option>
+                            <option value="FULL_TIME">Full-Time</option>
+                            <option value="PART_TIME">Part-Time</option>
+                            <option value="CONTRACT">Contract</option>
+                            <option value="FREELANCE">Freelance</option>
+                            <option value="INTERNSHIP">Internship</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Career Level</label>
+                        <select id="career-level" 
+                            class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all">
+                            <option value="">Select</option>
+                            <option value="JUNIOR">Junior</option>
+                            <option value="MID">Mid-Level</option>
+                            <option value="SENIOR">Senior</option>
+                            <option value="LEAD">Lead</option>
+                            <option value="MANAGER">Manager</option>
+                            <option value="EXECUTIVE">Executive</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Salary -->
+            <div class="mb-8">
+                <h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
+                    <span class="w-8 h-8 bg-primary-100 text-primary-600 rounded-lg flex items-center justify-center text-sm font-bold mr-3">4</span>
+                    Salary Information
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Minimum</label>
+                        <input type="number" id="salary-min" placeholder="0" 
+                            class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Maximum</label>
+                        <input type="number" id="salary-max" placeholder="0" 
+                            class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Currency</label>
+                        <select id="currency" 
+                            class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all">
+                            <option value="TRY">TRY</option>
+                            <option value="USD">USD</option>
+                            <option value="EUR">EUR</option>
+                            <option value="GBP">GBP</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Period</label>
+                        <select id="salary-period" 
+                            class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all">
+                            <option value="MONTHLY">Monthly</option>
+                            <option value="YEARLY">Yearly</option>
+                            <option value="HOURLY">Hourly</option>
+                            <option value="DAILY">Daily</option>
+                        </select>
+                    </div>
+                    <div class="md:col-span-2 flex items-center">
+                        <label class="flex items-center cursor-pointer">
+                            <input type="checkbox" id="price-negotiable" class="w-5 h-5 text-primary-600 rounded border-gray-300 focus:ring-primary-500">
+                            <span class="ml-3 text-gray-700">Salary is negotiable</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Visibility -->
+            <div class="mb-8">
+                <h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
+                    <span class="w-8 h-8 bg-primary-100 text-primary-600 rounded-lg flex items-center justify-center text-sm font-bold mr-3">5</span>
+                    Visibility
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Listing Visibility</label>
+                        <select id="visibility" 
+                            class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all">
+                            <option value="PUBLIC">Public</option>
+                            <option value="REGISTERED">Registered Users Only</option>
+                            <option value="HIDDEN">Hidden</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Filled Status Visibility</label>
+                        <select id="taken-visibility" 
+                            class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all">
+                            <option value="SHOW_TAKEN">Show as filled</option>
+                            <option value="SHOW_TAKEN_AND_ASSIGNEE">Show as filled and show the assigned person</option>
+                            <option value="HIDE_TAKEN">Hide</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit -->
+            <div class="flex flex-col sm:flex-row gap-4 pt-6 border-t border-gray-100">
+                <button type="submit" id="submit-btn" class="flex-1 btn-primary py-4 text-white font-semibold rounded-xl text-lg">
+                    <i class="fas fa-plus-circle mr-2"></i> Publish Listing
+                </button>
+                <button type="button" onclick="window.history.back()" class="px-8 py-4 border border-gray-200 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition">
+                    Cancel
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    (function checkAccess() {
+        const { user, token } = getAuthFromStorage();
+        if (!user || !token) {
+            window.location.href = '/login';
+            return;
+        }
+        if (!user.roles?.includes('EMPLOYER')) {
+            window.location.href = '/';
+        }
+    })();
+
+    async function handleSubmit(e) {
+        e.preventDefault();
+        
+        const { user } = getAuthFromStorage();
+        if (!user) {
+            showToast('Login Required', 'Please log in to post a listing.', 'error');
+            setTimeout(() => window.location.href = '/login', 1500);
+            return;
+        }
+        if (!user.roles?.includes('EMPLOYER')) {
+            showToast('Access Denied', 'Only employers can post job listings.', 'error');
+            return;
+        }
+
+        // Need employer profile
+        let employerProfileId;
+        try {
+            const profileData = await api(`/employer-profile/${user.id}`);
+            employerProfileId = profileData.data.id;
+        } catch (err) {
+            showToast('Error', 'You must create an employer profile first.', 'error');
+            return;
+        }
+
+        const btn = document.getElementById('submit-btn');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Publishing...';
+
+        try {
+            const payload = {
+                owner_user_id: user.id,
+                employer_profile_id: employerProfileId,
+                title: document.getElementById('title').value,
+                description: document.getElementById('description').value,
+                country: document.getElementById('country').value || null,
+                city: document.getElementById('city').value || null,
+                area: document.getElementById('area').value || null,
+                remote_allowed: document.getElementById('remote-allowed').checked,
+                workplace_type: document.getElementById('workplace-type').value || null,
+                job_type: document.getElementById('job-type').value || null,
+                career_level: document.getElementById('career-level').value || null,
+                salary_min_minor: document.getElementById('salary-min').value ? parseInt(document.getElementById('salary-min').value) : null,
+                salary_max_minor: document.getElementById('salary-max').value ? parseInt(document.getElementById('salary-max').value) : null,
+                currency: document.getElementById('currency').value,
+                salary_period: document.getElementById('salary-period').value,
+                price_negotiable: document.getElementById('price-negotiable').checked,
+                visibility: document.getElementById('visibility').value,
+                taken_visibility: document.getElementById('taken-visibility').value,
+                status: 'OPEN',
+                required_skills: []
+            };
+
+            const data = await api('/jobs', {
+                method: 'POST',
+                body: JSON.stringify(payload)
+            });
+
+            showToast('Success', 'Your job listing has been published!');
+            setTimeout(() => window.location.href = `/jobs/${data.data.id}`, 1500);
+        } catch (err) {
+            showToast('Error', err.message, 'error');
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-plus-circle mr-2"></i> Publish Listing';
+        }
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,164 @@
+{% extends "admin/admin_base.html" %}
+{% block title %}Job Detail{% endblock %}
+{% block page_title %}Job Detail{% endblock %}
+{% block content %}
+<div class="max-w-4xl mx-auto animate-fade-in">
+    <div class="mb-4">
+        <a href="/admin/jobs" class="text-sm text-gray-500 hover:text-admin-600"><i class="fas fa-arrow-left mr-1"></i> Job Listings</a>
+    </div>
+
+    <div id="job-detail" class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
+        <div class="flex items-start justify-between mb-6">
+            <div>
+                <h2 id="jd-title" class="text-xl font-bold text-gray-900">—</h2>
+                <p id="jd-location" class="text-gray-500 mt-1">—</p>
+            </div>
+            <div class="flex items-center space-x-2">
+                <span id="jd-status" class="px-3 py-1 rounded-full text-sm font-medium">—</span>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div class="space-y-3 text-sm">
+                <div class="flex justify-between border-b border-gray-100 pb-2">
+                    <span class="text-gray-500">Posted By</span>
+                    <span id="jd-owner" class="text-gray-900 font-medium">—</span>
+                </div>
+                <div class="flex justify-between border-b border-gray-100 pb-2">
+                    <span class="text-gray-500">Type</span>
+                    <span id="jd-type" class="text-gray-900 font-medium">—</span>
+                </div>
+                <div class="flex justify-between border-b border-gray-100 pb-2">
+                    <span class="text-gray-500">Workplace</span>
+                    <span id="jd-workplace" class="text-gray-900 font-medium">—</span>
+                </div>
+                <div class="flex justify-between border-b border-gray-100 pb-2">
+                    <span class="text-gray-500">Salary Range</span>
+                    <span id="jd-salary" class="text-gray-900 font-medium">—</span>
+                </div>
+            </div>
+            <div class="space-y-3 text-sm">
+                <div class="flex justify-between border-b border-gray-100 pb-2">
+                    <span class="text-gray-500">Currency</span>
+                    <span id="jd-currency" class="text-gray-900 font-medium">—</span>
+                </div>
+                <div class="flex justify-between border-b border-gray-100 pb-2">
+                    <span class="text-gray-500">Remote Work</span>
+                    <span id="jd-remote" class="text-gray-900 font-medium">—</span>
+                </div>
+                <div class="flex justify-between border-b border-gray-100 pb-2">
+                    <span class="text-gray-500">Created</span>
+                    <span id="jd-created" class="text-gray-900 font-medium">—</span>
+                </div>
+                <div class="flex justify-between border-b border-gray-100 pb-2">
+                    <span class="text-gray-500">Updated</span>
+                    <span id="jd-updated" class="text-gray-900 font-medium">—</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-6">
+            <h3 class="text-sm font-semibold text-gray-900 uppercase tracking-wide mb-2">Description</h3>
+            <p id="jd-description" class="text-sm text-gray-700 whitespace-pre-wrap">—</p>
+        </div>
+
+        <div class="flex items-center space-x-3 border-t border-gray-100 pt-6">
+            <div class="flex items-center space-x-2">
+                <select id="status-select" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-admin-500 outline-none">
+                    <option value="DRAFT">Draft</option>
+                    <option value="OPEN">Open</option>
+                    <option value="NEGOTIATING">Negotiating</option>
+                    <option value="IN_PROGRESS">In Progress</option>
+                    <option value="FILLED">Filled</option>
+                    <option value="COMPLETED">Completed</option>
+                    <option value="CANCELLED">Cancelled</option>
+                    <option value="HIDDEN">Hidden</option>
+                </select>
+                <button onclick="updateStatus()" class="px-4 py-2 bg-admin-600 text-white text-sm font-medium rounded-lg hover:bg-admin-700 transition-colors">Update Status</button>
+            </div>
+            <button onclick="confirmDeleteJob()" class="px-4 py-2 border border-red-300 text-red-600 text-sm font-medium rounded-lg hover:bg-red-50 transition-colors ml-auto">
+                <i class="fas fa-trash-alt mr-1"></i> Delete
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+    const JOB_ID = '{{ job_id }}';
+    let jobData = null;
+
+    async function loadJob() {
+        try {
+            const res = await adminApi(`/admin/jobs/${JOB_ID}`);
+            jobData = res.data;
+            renderJob();
+        } catch (err) {
+            showToast('Error', err.message, 'error');
+        }
+    }
+
+    function renderJob() {
+        if (!jobData) return;
+        const j = jobData;
+        document.getElementById('jd-title').textContent = j.title || 'Unnamed';
+        document.getElementById('jd-location').textContent = [j.country, j.city, j.area].filter(Boolean).join(', ') || '-';
+        document.getElementById('jd-status').textContent = j.status;
+        document.getElementById('jd-status').className = `px-3 py-1 rounded-full text-sm font-medium ${statusColor(j.status)}`;
+        document.getElementById('jd-owner').textContent = j.owner_name || '-';
+        document.getElementById('jd-type').textContent = j.job_type || '-';
+        document.getElementById('jd-workplace').textContent = j.workplace_type || '-';
+        document.getElementById('jd-salary').textContent = (j.salary_min_minor || j.salary_max_minor) ? `${j.salary_min_minor || 0} - ${j.salary_max_minor || 0}` : '-';
+        document.getElementById('jd-currency').textContent = j.currency || '-';
+        document.getElementById('jd-remote').textContent = j.remote_allowed ? 'Yes' : 'No';
+        document.getElementById('jd-created').textContent = formatDate(j.created_at);
+        document.getElementById('jd-updated').textContent = formatDate(j.updated_at);
+        document.getElementById('jd-description').textContent = j.description || '-';
+        document.getElementById('status-select').value = j.status;
+    }
+
+    function statusColor(status) {
+        const map = {
+            'DRAFT': 'bg-gray-100 text-gray-800',
+            'OPEN': 'bg-green-100 text-green-800',
+            'IN_PROGRESS': 'bg-blue-100 text-blue-800',
+            'COMPLETED': 'bg-purple-100 text-purple-800',
+            'CANCELLED': 'bg-red-100 text-red-800',
+            'HIDDEN': 'bg-yellow-100 text-yellow-800',
+            'NEGOTIATING': 'bg-indigo-100 text-indigo-800',
+            'FILLED': 'bg-pink-100 text-pink-800',
+        };
+        return map[status] || 'bg-gray-100 text-gray-800';
+    }
+
+    async function updateStatus() {
+        const status = document.getElementById('status-select').value;
+        openConfirmModal('Update Status', `Are you sure you want to change the job status to ${status}?`, async () => {
+            try {
+                await adminApi(`/admin/jobs/${JOB_ID}/status`, {
+                    method: 'PATCH',
+                    body: JSON.stringify({ status, note: 'Updated from admin panel' })
+                });
+                showToast('Success', 'Status updated.');
+                loadJob();
+            } catch (err) {
+                showToast('Error', err.message, 'error');
+            }
+        });
+    }
+
+    function confirmDeleteJob() {
+        openConfirmModal('Delete Job', 'Are you sure you want to delete this job?', async () => {
+            try {
+                await adminApi(`/admin/jobs/${JOB_ID}`, { method: 'DELETE' });
+                showToast('Success', 'Job deleted.');
+                setTimeout(() => window.location.href = '/admin/jobs', 800);
+            } catch (err) {
+                showToast('Error', err.message, 'error');
+            }
+        });
+    }
+
+    loadJob();
+</script>
+{% endblock %}

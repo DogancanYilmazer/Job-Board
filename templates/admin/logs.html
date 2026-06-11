@@ -1,0 +1,81 @@
+{% extends "admin/admin_base.html" %}
+{% block title %}Activity Logs{% endblock %}
+{% block page_title %}Logs{% endblock %}
+{% block content %}
+<div class="space-y-4 animate-fade-in">
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+            <h2 class="font-bold text-gray-900">Admin Activities</h2>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left">
+                <thead class="bg-gray-50 text-gray-500 text-xs uppercase">
+                    <tr>
+                        <th class="px-6 py-3 font-medium">Date</th>
+                        <th class="px-6 py-3 font-medium">Admin</th>
+                        <th class="px-6 py-3 font-medium">Action</th>
+                        <th class="px-6 py-3 font-medium">Target</th>
+                        <th class="px-6 py-3 font-medium">Description</th>
+                    </tr>
+                </thead>
+                <tbody id="logs-table" class="divide-y divide-gray-100 text-sm">
+                    <tr><td colspan="5" class="px-6 py-8 text-center text-gray-400">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
+            <p class="text-sm text-gray-500" id="pagination-info">—</p>
+            <div class="flex items-center space-x-2">
+                <button onclick="changePage(-1)" class="px-3 py-1.5 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 disabled:opacity-50" id="btn-prev">Previous</button>
+                <button onclick="changePage(1)" class="px-3 py-1.5 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 disabled:opacity-50" id="btn-next">Next</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+    let currentPage = 1;
+    let totalPages = 1;
+
+    async function loadLogs() {
+        const params = new URLSearchParams({ page: currentPage, limit: 50 });
+        try {
+            const res = await adminApi(`/admin/logs?${params.toString()}`);
+            const logs = res.data || [];
+            const meta = res.meta || {};
+            totalPages = Math.ceil((meta.total || 0) / meta.limit) || 1;
+
+            const tbody = document.getElementById('logs-table');
+            if (logs.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-8 text-center text-gray-400">No log records yet.</td></tr>';
+            } else {
+                tbody.innerHTML = logs.map(log => `
+                    <tr class="hover:bg-gray-50 transition-colors">
+                        <td class="px-6 py-3 text-gray-600 whitespace-nowrap">${formatDate(log.created_at)}</td>
+                        <td class="px-6 py-3 font-medium text-gray-900">${escapeHtml(log.admin_name || 'System')}</td>
+                        <td class="px-6 py-3">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-admin-100 text-admin-800">${escapeHtml(log.action_type)}</span>
+                        </td>
+                        <td class="px-6 py-3 text-gray-600">${escapeHtml(log.target_type || '-')} ${escapeHtml(log.target_id ? '(' + log.target_id.slice(0,8) + '...)' : '')}</td>
+                        <td class="px-6 py-3 text-gray-600">${escapeHtml(log.description || '-')}</td>
+                    </tr>
+                `).join('');
+            }
+            document.getElementById('pagination-info').textContent = `Page ${meta.page || 1} / ${totalPages} — Total ${meta.total || 0} records`;
+            document.getElementById('btn-prev').disabled = currentPage <= 1;
+            document.getElementById('btn-next').disabled = currentPage >= totalPages;
+        } catch (err) {
+            showToast('Error', err.message, 'error');
+        }
+    }
+
+    function changePage(delta) {
+        currentPage += delta;
+        if (currentPage < 1) currentPage = 1;
+        loadLogs();
+    }
+
+    loadLogs();
+</script>
+{% endblock %}

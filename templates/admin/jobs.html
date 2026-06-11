@@ -1,0 +1,127 @@
+{% extends "admin/admin_base.html" %}
+{% block title %}Job Listings Management{% endblock %}
+{% block page_title %}Job Listings{% endblock %}
+{% block content %}
+<div class="space-y-4 animate-fade-in">
+    <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+        <div class="flex flex-col md:flex-row md:items-end gap-3">
+            <div class="flex-1">
+                <label class="block text-xs font-medium text-gray-500 mb-1">Search</label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400"><i class="fas fa-search"></i></span>
+                    <input type="text" id="search-q" class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-admin-500 outline-none text-sm" placeholder="Job title, description..." onkeydown="if(event.key==='Enter') loadJobs()">
+                </div>
+            </div>
+            <div class="w-full md:w-48">
+                <label class="block text-xs font-medium text-gray-500 mb-1">Status</label>
+                <select id="filter-status" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-admin-500 outline-none text-sm" onchange="loadJobs()">
+                    <option value="">All</option>
+                    <option value="DRAFT">Draft</option>
+                    <option value="OPEN">Open</option>
+                    <option value="IN_PROGRESS">In Progress</option>
+                    <option value="COMPLETED">Completed</option>
+                    <option value="CANCELLED">Cancelled</option>
+                    <option value="HIDDEN">Hidden</option>
+                </select>
+            </div>
+            <button onclick="loadJobs()" class="px-4 py-2 bg-admin-600 text-white text-sm font-medium rounded-lg hover:bg-admin-700 transition-colors">
+                <i class="fas fa-filter mr-1"></i> Filter
+            </button>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left">
+                <thead class="bg-gray-50 text-gray-500 text-xs uppercase">
+                    <tr>
+                        <th class="px-6 py-3 font-medium">Job</th>
+                        <th class="px-6 py-3 font-medium">Posted By</th>
+                        <th class="px-6 py-3 font-medium">Status</th>
+                        <th class="px-6 py-3 font-medium">Date</th>
+                        <th class="px-6 py-3 font-medium text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="jobs-table" class="divide-y divide-gray-100 text-sm">
+                    <tr><td colspan="5" class="px-6 py-8 text-center text-gray-400">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
+            <p class="text-sm text-gray-500" id="pagination-info">—</p>
+            <div class="flex items-center space-x-2">
+                <button onclick="changePage(-1)" class="px-3 py-1.5 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 disabled:opacity-50" id="btn-prev">Previous</button>
+                <button onclick="changePage(1)" class="px-3 py-1.5 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 disabled:opacity-50" id="btn-next">Next</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+    let currentPage = 1;
+    let totalPages = 1;
+
+    async function loadJobs() {
+        const q = document.getElementById('search-q').value.trim();
+        const status = document.getElementById('filter-status').value;
+        const params = new URLSearchParams({ page: currentPage, limit: 20 });
+        if (q) params.set('q', q);
+        if (status) params.set('status', status);
+
+        try {
+            const res = await adminApi(`/admin/jobs?${params.toString()}`);
+            const jobs = res.data || [];
+            const meta = res.meta || {};
+            totalPages = Math.ceil((meta.total || 0) / meta.limit) || 1;
+
+            const tbody = document.getElementById('jobs-table');
+            if (jobs.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-8 text-center text-gray-400">No jobs found.</td></tr>';
+            } else {
+                tbody.innerHTML = jobs.map(j => `
+                    <tr class="hover:bg-gray-50 transition-colors">
+                        <td class="px-6 py-3">
+                            <p class="font-medium text-gray-900">${escapeHtml(j.title)}</p>
+                            <p class="text-xs text-gray-500">${escapeHtml(j.country || '')} ${escapeHtml(j.city || '')}</p>
+                        </td>
+                        <td class="px-6 py-3 text-gray-600">${escapeHtml(j.owner_name || '-')}</td>
+                        <td class="px-6 py-3">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${statusColor(j.status)}">${j.status}</span>
+                        </td>
+                        <td class="px-6 py-3 text-gray-600">${formatDate(j.created_at)}</td>
+                        <td class="px-6 py-3 text-right">
+                            <a href="/admin/jobs/${j.id}" class="text-admin-600 hover:text-admin-800 font-medium mr-3">Detail</a>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+            document.getElementById('pagination-info').textContent = `Page ${meta.page || 1} / ${totalPages} — Total ${meta.total || 0} records`;
+            document.getElementById('btn-prev').disabled = currentPage <= 1;
+            document.getElementById('btn-next').disabled = currentPage >= totalPages;
+        } catch (err) {
+            showToast('Error', err.message, 'error');
+        }
+    }
+
+    function statusColor(status) {
+        const map = {
+            'DRAFT': 'bg-gray-100 text-gray-800',
+            'OPEN': 'bg-green-100 text-green-800',
+            'IN_PROGRESS': 'bg-blue-100 text-blue-800',
+            'COMPLETED': 'bg-purple-100 text-purple-800',
+            'CANCELLED': 'bg-red-100 text-red-800',
+            'HIDDEN': 'bg-yellow-100 text-yellow-800',
+        };
+        return map[status] || 'bg-gray-100 text-gray-800';
+    }
+
+    function changePage(delta) {
+        currentPage += delta;
+        if (currentPage < 1) currentPage = 1;
+        loadJobs();
+    }
+
+    loadJobs();
+</script>
+{% endblock %}
