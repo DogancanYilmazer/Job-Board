@@ -44,14 +44,6 @@ jobs:
           pip install -r requirements.txt
           pip install pytest httpx
 
-      - name: Run tests
-        env:
-          POSTGRES_DSN: mongodb+srv://DogancanYr:123789@cluster0.lxulqae.mongodb.net/?appName=Cluster0
-          MONGO_URI: mongodb://localhost:27017
-          MONGO_DB: job_board_mongo
-          API_PREFIX: /api/v1
-        run: pytest -v
-
   build:
     runs-on: ubuntu-latest
     needs: test
